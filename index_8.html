@@ -1,0 +1,2021 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>厨房衛生管理記録システム</title>
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="衛生管理記録">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#185FA5">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Hiragino Kaku Gothic ProN','Hiragino Sans','Meiryo',sans-serif;background:#f5f5f0;color:#1a1a1a;font-size:16px}
+.app{max-width:980px;margin:0 auto;padding:12px}
+.header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#fff;border:1px solid #e0e0d8;border-radius:12px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.06)}
+.header-title{font-size:17px;font-weight:600;color:#1a1a1a}
+.header-sub{font-size:12px;color:#666;margin-top:2px}
+.tabs{display:flex;gap:5px;margin-bottom:10px;overflow-x:auto;padding-bottom:4px}
+.tab{flex-shrink:0;padding:10px 15px;border-radius:8px;border:1px solid #d8d8d0;background:#f0f0ea;font-size:13px;color:#555;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.tab.active{background:#185FA5;color:#fff;border-color:#185FA5;font-weight:600}
+.section{background:#fff;border:1px solid #e0e0d8;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.sec-title{font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #eee}
+.info-box{background:#eef4fb;border-left:3px solid #185FA5;padding:7px 10px;border-radius:0 8px 8px 0;font-size:11px;color:#1a4a7a;margin-bottom:10px}
+.warn-box{background:#fef3e2;border-left:3px solid #d97706;padding:7px 10px;border-radius:0 8px 8px 0;font-size:11px;color:#7c3a00;margin-bottom:10px}
+.page{display:none}.page.active{display:block}
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600}
+.b-ok{background:#dcfce7;color:#15803d}.b-ng{background:#fee2e2;color:#dc2626}.b-pend{background:#fef9c3;color:#854d0e}.b-info{background:#dbeafe;color:#1d4ed8}
+.tbn{padding:12px 18px;border-radius:8px;border:1px solid #d8d8d0;font-size:22px;font-weight:600;cursor:pointer;min-width:60px;text-align:center;background:#f5f5f0;color:#555;-webkit-tap-highlight-color:transparent;transition:all .1s}
+.tbn:active{transform:scale(0.96)}
+.tbn.ok{background:#dcfce7;color:#15803d;border-color:#86efac}
+.tbn.ng{background:#fee2e2;color:#dc2626;border-color:#fca5a5}
+.wtab{padding:8px 13px;border-radius:8px;border:1px solid #d8d8d0;font-size:12px;cursor:pointer;background:#f0f0ea;color:#555;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.wtab.active{background:#378ADD;color:#fff;border-color:#378ADD;font-weight:600}
+.ward-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;align-items:center}
+.fi{font-size:15px;padding:9px 11px;border:1px solid #d8d8d0;border-radius:8px;background:#fafafa;color:#1a1a1a;width:100%}
+.fi:focus{outline:none;border-color:#185FA5;background:#fff}
+.ti{font-size:15px;padding:9px 8px;border:1px solid #d8d8d0;border-radius:8px;background:#fafafa;color:#1a1a1a;text-align:center;width:100%}
+.ti:focus{outline:none;border-color:#185FA5}
+.ti.tok{border-color:#86efac;background:#f0fdf4}.ti.twarn{border-color:#fca5a5;background:#fff5f5}
+.del-btn{padding:6px 10px;border-radius:8px;border:1px solid #d8d8d0;background:transparent;color:#999;font-size:13px;cursor:pointer;white-space:nowrap}
+.del-btn:hover,.del-btn:active{background:#fee2e2;color:#dc2626;border-color:#fca5a5}
+.add-row-btn{display:flex;align-items:center;justify-content:center;gap:5px;width:100%;padding:10px;border:1.5px dashed #d8d8d0;border-radius:8px;background:transparent;color:#888;font-size:13px;cursor:pointer;margin-top:7px;-webkit-tap-highlight-color:transparent}
+.add-row-btn:active{background:#f5f5f0}
+.staff-card{border:1px solid #e0e0d8;border-radius:10px;margin-bottom:7px;overflow:hidden}
+.staff-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;background:#f8f8f4;-webkit-tap-highlight-color:transparent}
+.staff-body{max-height:0;overflow:hidden;transition:max-height .25s ease}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid #eee;border-radius:8px;margin-bottom:5px}
+.contact-textarea{width:100%;font-size:14px;padding:10px 12px;border:1px solid #d8d8d0;border-radius:8px;background:#fafafa;color:#1a1a1a;min-height:70px;resize:vertical;line-height:1.6;font-family:inherit}
+.contact-textarea:focus{outline:none;border-color:#185FA5}
+.temp-row{display:grid;grid-template-columns:1fr 80px 80px;gap:6px;align-items:center;padding:9px 12px;border:1px solid #e0e0d8;border-radius:10px;margin-bottom:5px}
+.heat-table{width:100%;border-collapse:collapse;table-layout:fixed}
+.heat-table th{font-size:11px;color:#666;text-align:center;padding:4px 4px;font-weight:600;border-bottom:1px solid #eee;background:#f8f8f4}
+.heat-table td{padding:3px 2px;vertical-align:middle}
+.heat-table input{font-size:14px;padding:8px 4px;border:1px solid #d8d8d0;border-radius:7px;background:#fafafa;color:#1a1a1a;width:100%;text-align:center;font-family:inherit}
+.heat-table input:focus{outline:none;border-color:#185FA5}
+.heat-table select{font-size:13px;padding:8px 3px;border:1px solid #d8d8d0;border-radius:7px;background:#fafafa;color:#1a1a1a;width:100%;font-family:inherit}
+.av-row{display:grid;gap:5px;align-items:center;padding:7px 10px;border:1px solid #e0e0d8;border-radius:9px;margin-bottom:4px}
+.hist-row{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border:1px solid #e0e0d8;border-radius:10px;margin-bottom:6px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.hist-row:active{background:#f5f5f0}
+.prog-bar{height:5px;background:#e0e0d8;border-radius:3px;overflow:hidden;margin-top:7px}
+.prog-fill{height:100%;background:#185FA5;border-radius:3px;transition:width .3s}
+.save-bar{position:sticky;bottom:10px;display:flex;gap:8px;padding:12px 14px;background:#fff;border:1px solid #e0e0d8;border-radius:12px;margin-top:10px;box-shadow:0 4px 16px rgba(0,0,0,0.1)}
+.btn{flex:1;padding:15px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;border:none;-webkit-tap-highlight-color:transparent;font-family:inherit}
+.btn:active{transform:scale(0.98)}
+.btn-p{background:#185FA5;color:#fff}
+.btn-s{background:#f0f0ea;color:#333;border:1px solid #d8d8d0}
+.clean-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px}
+.clean-item{border:1px solid #e0e0d8;border-radius:10px;padding:10px}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;align-items:flex-end;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:16px 16px 0 0;padding:20px;width:100%;max-width:500px;max-height:85vh;overflow-y:auto}
+@media(min-width:600px){.modal-bg{align-items:center}.modal{border-radius:16px;max-height:80vh}}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:14px;color:#1a1a1a}
+.modal-item{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.modal-item input{flex:1}
+.save-indicator{font-size:11px;color:#15803d;opacity:0;transition:opacity .5s}
+.save-indicator.show{opacity:1}
+
+@media print{
+  .tabs,.save-bar,.no-print{display:none!important}
+  .page{display:block!important}
+  body{background:#fff}
+  .section{box-shadow:none;break-inside:avoid;border:1px solid #ccc;margin-bottom:8px}
+  .app{padding:0}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="header">
+  <div>
+    <div class="header-title">厨房衛生管理記録システム</div>
+    <div class="header-sub" id="hdate"></div>
+  </div>
+  <div style="display:flex;gap:6px;align-items:center">
+    <span class="save-indicator" id="save-indicator">自動保存済み</span>
+    <span class="badge b-pend" id="overall-badge">記録中</span>
+  </div>
+</div>
+
+<div id="date-changed-banner" style="display:none;margin-bottom:10px">
+  <div class="warn-box" style="margin-bottom:0">日付が変わりました。昨日の記録を自動保存し、新しい日付で記録を開始します。</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab(0)">健康チェック</div>
+  <div class="tab" onclick="switchTab(1)">清掃点検</div>
+  <div class="tab" onclick="switchTab(2)">冷蔵・冷凍温度管理</div>
+  <div class="tab" onclick="switchTab(3)">加熱・冷却</div>
+  <div class="tab" onclick="switchTab(4)">油脂AV値</div>
+  <div class="tab" onclick="switchTab(5)">履歴</div>
+  <div class="tab" onclick="switchTab(6)">検収記録</div>
+  <div class="tab" onclick="switchTab(7)">温度・湿度</div>
+  <div class="tab" onclick="switchTab(8)">調理器具</div>
+  <div class="tab" onclick="switchTab(9)">ガラス容器</div>
+  <div class="tab" onclick="switchTab(10)">薬剤在庫</div>
+</div>
+
+<!-- 健康チェック -->
+<div id="page0" class="page active">
+  <div class="section">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <div class="sec-title" style="margin-bottom:0;border:none;padding:0">別表11 入室時の健康チェック</div>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <span style="font-size:12px;color:#666">点検者：</span>
+        <input id="inspector" class="fi" style="width:100px;font-size:13px;padding:6px 9px" placeholder="氏名" oninput="autoSave()">
+        <button class="wtab no-print" onclick="openStaffModal()">スタッフ編集</button>
+      </div>
+    </div>
+    <div class="info-box">○=適合　×=不適合（不適の場合は改善指導し、上長へ報告）</div>
+    <div id="health-list"></div>
+    <div class="prog-bar"><div class="prog-fill" id="hprog" style="width:0%"></div></div>
+    <div style="font-size:12px;color:#666;margin-top:5px;text-align:right" id="hcount">0 / 0 名完了</div>
+    <div style="margin-top:14px;padding-top:12px;border-top:1px solid #eee">
+      <div style="font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:8px">連絡事項</div>
+      <div style="display:flex;flex-direction:column;gap:7px" id="contact-list"></div>
+      <button class="add-row-btn" onclick="addContact()">＋ 連絡事項を追加</button>
+    </div>
+  </div>
+</div>
+
+<!-- 清掃点検 -->
+<div id="page1" class="page">
+  <div style="display:flex;gap:5px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
+    <div class="ward-tabs" id="clean-ward-tabs" style="flex:1;margin-bottom:0"></div>
+    <button class="wtab no-print" onclick="openCleanWardModal()">施設編集</button>
+  </div>
+  <div class="section">
+    <div class="sec-title" id="clean-ward-title">清掃点検</div>
+    <div class="info-box">正常：○　不良：× を記録。不良の場合は管理部へ報告・修理依頼。</div>
+    <div class="clean-grid" id="clean-grid"></div>
+    <div style="margin-top:10px">
+      <label style="font-size:12px;color:#666;display:block;margin-bottom:4px">修理記録・特記事項</label>
+      <textarea id="clean-note" class="fi" style="min-height:56px;resize:vertical;font-family:inherit;font-size:14px" oninput="autoSave()"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- 冷蔵冷凍温度管理 -->
+<div id="page2" class="page">
+  <div style="display:flex;gap:5px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
+    <div class="ward-tabs" id="temp-ward-tabs" style="flex:1;margin-bottom:0"></div>
+    <button class="wtab no-print" onclick="addTempWardQuick()">＋ エリア追加</button>
+    <button class="wtab no-print" onclick="openTempEditModal()">機器編集</button>
+  </div>
+  <div class="section">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <div class="sec-title" style="margin-bottom:0;border:none;padding:0" id="temp-ward-title">冷蔵・冷凍温度管理</div>
+      <div style="display:flex;gap:5px">
+        <button class="tbn" style="font-size:12px;padding:7px 11px" onclick="markTime('s')">始業記録</button>
+        <button class="tbn" style="font-size:12px;padding:7px 11px" onclick="markTime('e')">終業記録</button>
+      </div>
+    </div>
+    <div class="info-box">管理温度を超えると赤表示 → 即座に上長へ報告</div>
+    <div id="temp-grid"></div>
+  </div>
+</div>
+
+<!-- 加熱冷却 -->
+<div id="page3" class="page">
+  <div class="section">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <div class="sec-title" style="margin-bottom:0;border:none;padding:0">別表8 加熱・冷却記録</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="wtab no-print" onclick="openWorkerModal()">担当者編集</button>
+      </div>
+    </div>
+    <div class="info-box">加熱基準：芯温85℃以上 1分加熱　冷却基準：60分以内に10℃以下</div>
+    <div style="display:flex;gap:5px;margin-bottom:6px;flex-wrap:wrap;align-items:center">
+      <div id="heat-type-tabs" style="display:flex;gap:5px;flex-wrap:wrap;flex:1"></div>
+      <button class="wtab no-print" onclick="addHeatType()" style="font-size:12px;padding:7px 11px">＋ 種別追加</button>
+    </div>
+    <div style="overflow-x:auto">
+    <table class="heat-table" style="min-width:520px">
+      <thead><tr>
+        <th style="width:20%">品名</th><th style="width:13%">油温/庫温℃</th><th style="width:13%">加熱開始</th>
+        <th style="width:13%">芯温℃</th><th style="width:13%">担当者</th><th style="width:12%">冷却開始</th>
+        <th style="width:12%">冷却後℃</th><th style="width:4%"></th>
+      </tr></thead>
+      <tbody id="heat-body"></tbody>
+    </table>
+    </div>
+    <button class="add-row-btn" onclick="addHRow()">＋ 行を追加</button>
+  </div>
+  <div class="section">
+    <div class="sec-title">記録サマリー</div>
+    <div id="heat-summary"></div>
+  </div>
+</div>
+
+<!-- 油脂AV値 -->
+<div id="page4" class="page">
+  <div class="section">
+    <div class="sec-title">別表5 油脂AV値確認票</div>
+    <div class="info-box">試験紙にて計測。AV値 2.5 を超えた場合は交換。厨房長確認後、月末に管理部へ提出。</div>
+    <div style="display:flex;gap:5px;margin-bottom:10px">
+      <button class="wtab active" onclick="setAVWard(this,'w')">和食厨房</button>
+      <button class="wtab" onclick="setAVWard(this,'y')">洋食厨房3F</button>
+    </div>
+    <div id="av-header" style="display:grid;gap:5px;padding:4px 10px;font-size:11px;color:#666;font-weight:600"></div>
+    <div id="av-rows"></div>
+  </div>
+</div>
+
+<!-- 履歴 -->
+<div id="page5" class="page">
+  <div class="section">
+    <div class="sec-title">日次記録 履歴</div>
+    <div class="info-box">保存済みの記録を確認・印刷できます</div>
+    <div id="hist-list"></div>
+    <div id="hist-empty" style="font-size:13px;color:#aaa;padding:24px;text-align:center">まだ保存された記録はありません</div>
+  </div>
+  <div id="hist-detail" style="display:none">
+    <div class="section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="sec-title" style="margin-bottom:0;border:none;padding:0" id="hist-detail-title">記録詳細</div>
+        <button onclick="window.print()" style="background:#15803d;color:#fff;padding:8px 14px;font-size:13px;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:600">印刷 / PDF保存</button>
+      </div>
+      <div id="hist-detail-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 検収記録 -->
+<div id="page6" class="page">
+  <div class="section">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <div class="sec-title" style="margin-bottom:0;border:none;padding:0">検収記録</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="wtab no-print" onclick="document.getElementById('pdf-upload').click()">PDFを取り込む</button>
+        <input type="file" id="pdf-upload" accept=".pdf" multiple style="display:none" onchange="loadPDFs(this)">
+        <button class="wtab no-print" onclick="addManualEntry()">手動で追加</button>
+      </div>
+    </div>
+    <div class="info-box">PDFを取り込むと業者名・品目が自動入力されます。空欄（納品時刻・温度・検収チェック等）をタップして記入してください。</div>
+    <div id="inspection-list">
+      <div style="font-size:13px;color:#aaa;padding:24px;text-align:center" id="inspection-empty">PDFを取り込むか「手動で追加」をタップしてください</div>
+    </div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap" id="inspection-actions" style="display:none">
+      <button class="btn btn-s" style="flex:1;padding:11px;font-size:13px" onclick="exportInspectionCSV()">Excelで書き出す</button>
+      <button class="btn btn-p" style="flex:1;padding:11px;font-size:13px" onclick="saveInspections()">検収記録を保存</button>
+    </div>
+  </div>
+  <div class="section" id="inspection-history-section">
+    <div class="sec-title">検収履歴</div>
+    <div id="inspection-history-list"></div>
+    <div id="inspection-history-empty" style="font-size:13px;color:#aaa;padding:16px;text-align:center">保存された検収記録はありません</div>
+  </div>
+</div>
+
+<!-- 温度・湿度および検食の記録 -->
+<div id="page7" class="page">
+  <div class="section">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <div class="sec-title" style="margin-bottom:0;border:none;padding:0">厨房内温度・湿度および検食の記録</div>
+      <button class="wtab no-print" onclick="openTempHumidAreaModal()">エリア編集</button>
+    </div>
+    <div class="info-box">基準：温度25℃以下　湿度80％以下　超過時は上長へ報告</div>
+    <div class="ward-tabs" id="th-area-tabs"></div>
+    <div id="th-grid"></div>
+  </div>
+</div>
+
+<!-- 調理器具の管理票 -->
+<div id="page8" class="page">
+  <div class="section">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <div class="sec-title" style="margin-bottom:0;border:none;padding:0">別表14 調理器具の管理票</div>
+      <button class="wtab no-print" onclick="openKnifeAreaModal()">エリア編集</button>
+    </div>
+    <div class="info-box">始業・終業時に本数と破損状況を確認。破損があれば即座に上長へ報告。</div>
+    <div class="ward-tabs" id="knife-area-tabs"></div>
+    <div id="knife-grid"></div>
+  </div>
+</div>
+
+<!-- ガラス容器の管理票 -->
+<div id="page9" class="page">
+  <div class="section">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <div class="sec-title" style="margin-bottom:0;border:none;padding:0">別表15 ガラス容器の管理票</div>
+      <button class="wtab no-print" onclick="openGlassAreaModal()">エリア・品目編集</button>
+    </div>
+    <div class="info-box">始業・終業時にガラス容器の破損を確認。破損があれば即座に上長へ報告。</div>
+    <div class="ward-tabs" id="glass-area-tabs"></div>
+    <div id="glass-grid"></div>
+  </div>
+</div>
+
+<!-- 薬剤在庫管理 -->
+<div id="page10" class="page">
+  <div class="section">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <div class="sec-title" style="margin-bottom:0;border:none;padding:0">別表17 薬剤在庫管理</div>
+      <button class="wtab no-print" onclick="openChemEditModal()">薬剤品目編集</button>
+    </div>
+    <div class="info-box">毎日の入荷・出庫・帳簿在庫・実在庫を記録。不一致の場合は逸脱対応欄に記入し上長へ報告。</div>
+    <div id="chem-grid"></div>
+  </div>
+</div>
+
+<!-- モーダル: 温度湿度エリア編集 -->
+<div class="modal-bg" id="th-area-modal"><div class="modal">
+  <div class="modal-title">温度・湿度 エリア管理</div>
+  <div id="th-area-modal-list"></div>
+  <button class="add-row-btn" style="margin-top:8px" onclick="addTHArea()">＋ エリアを追加</button>
+  <div style="display:flex;gap:8px;margin-top:16px">
+    <button class="btn btn-s" onclick="closeModal('th-area-modal')">キャンセル</button>
+    <button class="btn btn-p" onclick="saveTHAreas()">保存</button>
+  </div>
+</div></div>
+
+<!-- モーダル: 調理器具エリア編集 -->
+<div class="modal-bg" id="knife-area-modal"><div class="modal">
+  <div class="modal-title">調理器具 エリア管理</div>
+  <div id="knife-area-modal-list"></div>
+  <button class="add-row-btn" style="margin-top:8px" onclick="addKnifeArea()">＋ エリアを追加</button>
+  <div style="display:flex;gap:8px;margin-top:16px">
+    <button class="btn btn-s" onclick="closeModal('knife-area-modal')">キャンセル</button>
+    <button class="btn btn-p" onclick="saveKnifeAreas()">保存</button>
+  </div>
+</div></div>
+
+<!-- モーダル: ガラス容器エリア・品目編集 -->
+<div class="modal-bg" id="glass-area-modal"><div class="modal">
+  <div class="modal-title">ガラス容器 エリア・品目管理</div>
+  <div style="font-size:12px;color:#666;margin-bottom:10px">エリア名と品目（カンマ区切り）を入力</div>
+  <div id="glass-area-modal-list"></div>
+  <button class="add-row-btn" style="margin-top:8px" onclick="addGlassArea()">＋ エリアを追加</button>
+  <div style="display:flex;gap:8px;margin-top:16px">
+    <button class="btn btn-s" onclick="closeModal('glass-area-modal')">キャンセル</button>
+    <button class="btn btn-p" onclick="saveGlassAreas()">保存</button>
+  </div>
+</div></div>
+
+<!-- モーダル: 薬剤品目編集 -->
+<div class="modal-bg" id="chem-edit-modal"><div class="modal">
+  <div class="modal-title">薬剤品目管理</div>
+  <div id="chem-edit-list"></div>
+  <button class="add-row-btn" style="margin-top:8px" onclick="addChemItem()">＋ 薬剤を追加</button>
+  <div style="display:flex;gap:8px;margin-top:16px">
+    <button class="btn btn-s" onclick="closeModal('chem-edit-modal')">キャンセル</button>
+    <button class="btn btn-p" onclick="saveChemItems()">保存</button>
+  </div>
+</div></div>
+
+<div class="save-bar no-print">
+  <button class="btn btn-s" onclick="window.print()">印刷</button>
+  <button class="btn btn-s" onclick="openDataModal()" style="flex:1.2">データ管理</button>
+  <div style="flex:0.15"></div>
+  <button class="btn btn-p" onclick="doSave()">本日の記録を保存</button>
+</div>
+</div>
+
+<!-- データ管理モーダル -->
+<div class="modal-bg" id="data-modal"><div class="modal">
+  <div class="modal-title">データ管理</div>
+
+  <div style="margin-bottom:18px">
+    <div style="font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:6px">JSONバックアップ</div>
+    <div style="font-size:12px;color:#666;margin-bottom:10px;line-height:1.6">全データ（設定・履歴・本日の記録）をファイルに書き出します。別の端末に移したり、バックアップとして保管できます。</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-s" onclick="exportJSON()" style="flex:1;padding:11px;font-size:13px">書き出す（エクスポート）</button>
+      <button class="btn btn-s" onclick="document.getElementById('import-file').click()" style="flex:1;padding:11px;font-size:13px">読み込む（インポート）</button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(this)">
+    </div>
+  </div>
+
+  <div style="border-top:1px solid #eee;padding-top:16px;margin-bottom:18px">
+    <div style="font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:6px">Excel書き出し</div>
+    <div style="font-size:12px;color:#666;margin-bottom:10px;line-height:1.6">履歴データをExcelファイル（.xlsx）として書き出します。Excelで開いて確認・印刷・保管ができます。</div>
+    <button class="btn btn-s" onclick="exportExcel()" style="width:100%;padding:11px;font-size:13px">Excelファイルとして書き出す</button>
+  </div>
+
+  <div style="border-top:1px solid #eee;padding-top:16px">
+    <div style="font-size:13px;font-weight:600;color:#dc2626;margin-bottom:6px">全データを消去</div>
+    <div style="font-size:12px;color:#666;margin-bottom:10px;line-height:1.6">このブラウザに保存されている全データを削除します。消去後は元に戻せません。</div>
+    <button class="btn" onclick="clearAllData()" style="width:100%;padding:11px;font-size:13px;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5">全データを消去する</button>
+  </div>
+
+  <div style="margin-top:16px">
+    <button class="btn btn-s" onclick="closeModal('data-modal')" style="width:100%;padding:12px">閉じる</button>
+  </div>
+</div></div>
+
+<!-- モーダル -->
+<div class="modal-bg" id="staff-modal"><div class="modal">
+  <div class="modal-title">スタッフ管理</div>
+  <div id="staff-modal-list"></div>
+  <button class="add-row-btn" style="margin-top:8px" onclick="addStaff()">＋ スタッフを追加</button>
+  <div style="display:flex;gap:8px;margin-top:16px">
+    <button class="btn btn-s" onclick="closeModal('staff-modal')">キャンセル</button>
+    <button class="btn btn-p" onclick="saveStaff()">保存</button>
+  </div>
+</div></div>
+
+<div class="modal-bg" id="clean-ward-modal"><div class="modal">
+  <div class="modal-title">清掃施設 管理</div>
+  <div id="clean-ward-modal-list"></div>
+  <button class="add-row-btn" style="margin-top:8px" onclick="addCleanWard()">＋ 施設を追加</button>
+  <div style="display:flex;gap:8px;margin-top:16px">
+    <button class="btn btn-s" onclick="closeModal('clean-ward-modal')">キャンセル</button>
+    <button class="btn btn-p" onclick="saveCleanWard()">保存</button>
+  </div>
+</div></div>
+
+<div class="modal-bg" id="temp-edit-modal"><div class="modal">
+  <div class="modal-title" id="temp-edit-modal-title">機器編集</div>
+  <div style="font-size:12px;color:#666;margin-bottom:10px">品名 ／ 設定温度 ／ 管理上限℃ ／ 種別</div>
+  <div id="temp-edit-list"></div>
+  <button class="add-row-btn" style="margin-top:8px" onclick="addTempItem()">＋ 機器を追加</button>
+  <div style="display:flex;gap:8px;margin-top:16px">
+    <button class="btn btn-s" onclick="closeModal('temp-edit-modal')">キャンセル</button>
+    <button class="btn btn-p" onclick="saveTempItems()">保存</button>
+  </div>
+</div></div>
+
+<div class="modal-bg" id="worker-modal"><div class="modal">
+  <div class="modal-title">担当者リスト管理</div>
+  <div id="worker-modal-list"></div>
+  <button class="add-row-btn" style="margin-top:8px" onclick="addWorker()">＋ 担当者を追加</button>
+  <div style="display:flex;gap:8px;margin-top:16px">
+    <button class="btn btn-s" onclick="closeModal('worker-modal')">キャンセル</button>
+    <button class="btn btn-p" onclick="saveWorkers()">保存</button>
+  </div>
+</div></div>
+
+<script>
+// ===== localStorage キー =====
+const LS_SETTINGS = 'khg_settings';
+const LS_TODAY    = 'khg_today';
+const LS_RECORDS  = 'khg_records';
+
+function lsGet(key){ try{ const v=localStorage.getItem(key); return v?JSON.parse(v):null; }catch(e){return null;} }
+function lsSet(key,val){ try{ localStorage.setItem(key,JSON.stringify(val)); }catch(e){} }
+
+// ===== 日付 =====
+const fmtDate = d => d.toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
+const fmtKey  = d => d.toISOString().slice(0,10);
+let currentDateKey = fmtKey(new Date());
+document.getElementById('hdate').textContent = fmtDate(new Date());
+
+setInterval(()=>{
+  const nk=fmtKey(new Date());
+  if(nk!==currentDateKey){
+    doSaveInternal(true);
+    currentDateKey=nk;
+    document.getElementById('hdate').textContent=fmtDate(new Date());
+    document.getElementById('date-changed-banner').style.display='block';
+    setTimeout(()=>document.getElementById('date-changed-banner').style.display='none',8000);
+    resetDailyData();
+    loadTodayData();
+    renderAll();
+  }
+},60000);
+
+// ===== マスターデータ =====
+let staffList=[], workerList=[];
+let cleanWards=getDefaultCleanWards();
+let tempWards=getDefaultTempWards();
+
+function getDefaultCleanWards(){return[
+  {name:'和食厨房',items:[{label:'床の清掃',freq:'毎日',hasClean:false},{label:'排水溝の清掃',freq:'毎日',hasClean:false},{label:'グリストラップ',freq:'週1回',hasClean:false},{label:'壁の清掃',freq:'毎日',hasClean:false},{label:'天井・照明・換気扇',freq:'毎日点検/月1回清掃',hasClean:true},{label:'作業台の清掃',freq:'毎日',hasClean:false},{label:'包丁・まな板・ふきん',freq:'毎日',hasClean:false},{label:'次亜塩素濃度(200ppm)',freq:'毎日',hasClean:false},{label:'スライサー',freq:'毎日',hasClean:false},{label:'冷蔵庫',freq:'毎日点検/週1回清掃',hasClean:true},{label:'冷凍庫',freq:'毎日点検/週1回清掃',hasClean:true},{label:'従業員の衛生教育',freq:'週1回',hasClean:false},{label:'使用水の確認',freq:'毎日',hasClean:false},{label:'ねずみ・害虫の確認',freq:'毎日',hasClean:false}]},
+  {name:'盛付け',items:[{label:'床の清掃',freq:'毎日',hasClean:false},{label:'排水溝の清掃',freq:'毎日',hasClean:false},{label:'壁の清掃',freq:'毎日',hasClean:false},{label:'天井・照明・換気扇',freq:'毎日点検/月1回清掃',hasClean:true},{label:'作業台の清掃',freq:'毎日',hasClean:false},{label:'包丁・まな板・ふきん',freq:'毎日',hasClean:false},{label:'次亜塩素濃度(200ppm)',freq:'毎日',hasClean:false},{label:'冷蔵庫',freq:'毎日点検/週1回清掃',hasClean:true},{label:'冷凍庫',freq:'毎日点検/週1回清掃',hasClean:true},{label:'従業員の衛生教育',freq:'週1回',hasClean:false},{label:'使用水の確認',freq:'毎日',hasClean:false},{label:'ねずみ・害虫の確認',freq:'毎日',hasClean:false}]},
+  {name:'寿司部',items:[{label:'床の清掃',freq:'毎日',hasClean:false},{label:'排水溝の清掃',freq:'毎日',hasClean:false},{label:'壁の清掃',freq:'毎日',hasClean:false},{label:'天井・照明・換気扇',freq:'毎日点検/月1回清掃',hasClean:true},{label:'作業台の清掃',freq:'毎日',hasClean:false},{label:'包丁・まな板・ふきん',freq:'毎日',hasClean:false},{label:'寿司ロボット・シャリッカー',freq:'毎日',hasClean:false},{label:'海苔巻き機・カッター',freq:'毎日',hasClean:false},{label:'冷蔵庫',freq:'毎日点検/週1回清掃',hasClean:true},{label:'冷凍庫',freq:'毎日点検/週1回清掃',hasClean:true},{label:'従業員の衛生教育',freq:'週1回',hasClean:false},{label:'使用水の確認',freq:'毎日',hasClean:false},{label:'ねずみ・害虫の確認',freq:'毎日',hasClean:false}]},
+  {name:'洋食厨房2F',items:[{label:'床の清掃',freq:'毎日',hasClean:false},{label:'排水溝の清掃',freq:'毎日',hasClean:false},{label:'グリストラップ',freq:'週1回',hasClean:false},{label:'壁の清掃',freq:'毎日',hasClean:false},{label:'天井・照明・換気扇',freq:'毎日点検/月1回清掃',hasClean:true},{label:'作業台の清掃',freq:'毎日',hasClean:false},{label:'包丁・まな板・ふきん',freq:'毎日',hasClean:false},{label:'次亜塩素濃度(200ppm)',freq:'毎日',hasClean:false},{label:'スライサー',freq:'毎日',hasClean:false},{label:'包丁まな板殺菌庫(80℃30分)',freq:'毎日',hasClean:false},{label:'冷蔵庫',freq:'毎日点検/週1回清掃',hasClean:true},{label:'冷凍庫',freq:'毎日点検/週1回清掃',hasClean:true},{label:'従業員の衛生教育',freq:'週1回',hasClean:false},{label:'使用水の確認',freq:'毎日',hasClean:false},{label:'ねずみ・害虫の確認',freq:'毎日',hasClean:false}]},
+  {name:'洋食厨房3F',items:[{label:'床の清掃',freq:'毎日',hasClean:false},{label:'排水溝の清掃',freq:'毎日',hasClean:false},{label:'グリストラップ',freq:'週1回',hasClean:false},{label:'壁の清掃',freq:'毎日',hasClean:false},{label:'天井・照明・換気扇',freq:'毎日点検/月1回清掃',hasClean:true},{label:'作業台の清掃',freq:'毎日',hasClean:false},{label:'包丁・まな板・ふきん',freq:'毎日',hasClean:false},{label:'次亜塩素濃度(200ppm)',freq:'毎日',hasClean:false},{label:'スライサー',freq:'毎日',hasClean:false},{label:'包丁まな板殺菌庫(80℃30分)',freq:'毎日',hasClean:false},{label:'冷蔵庫',freq:'毎日点検/週1回清掃',hasClean:true},{label:'冷凍庫',freq:'毎日点検/週1回清掃',hasClean:true},{label:'従業員の衛生教育',freq:'週1回',hasClean:false},{label:'使用水の確認',freq:'毎日',hasClean:false},{label:'ねずみ・害虫の確認',freq:'毎日',hasClean:false}]},
+];}
+function getDefaultTempWards(){return[
+  {name:'和食厨房①',fridges:[{name:'野菜・卵',set:'5℃',limit:10,frz:false},{name:'調理済み品',set:'0℃',limit:10,frz:false},{name:'冷凍食品',set:'-30℃',limit:-15,frz:true},{name:'鮪',set:'-30℃',limit:-15,frz:true},{name:'賄い用',set:'5℃',limit:10,frz:false},{name:'刺身',set:'2℃',limit:10,frz:false}]},
+  {name:'盛付け',fridges:[{name:'旨煮タッパー①',set:'3℃',limit:10,frz:false},{name:'旨煮タッパー②',set:'3℃',limit:10,frz:false},{name:'香の物',set:'3℃',limit:10,frz:false},{name:'食材・フルーツ',set:'5℃',limit:10,frz:false},{name:'調理品',set:'10℃',limit:15,frz:false}]},
+  {name:'洋食厨房2F',fridges:[{name:'調味ソース',set:'3℃',limit:10,frz:false},{name:'通夜品',set:'3℃',limit:10,frz:false},{name:'肉',set:'3℃',limit:10,frz:false},{name:'フルーツ',set:'5℃',limit:10,frz:false},{name:'冷凍品①',set:'-20℃',limit:-15,frz:true},{name:'冷凍品②',set:'-20℃',limit:-15,frz:true}]},
+];}
+
+const CHECKS=[{id:'c1',label:'服装',desc:'白衣・帽子・マスク・手袋の正しい着用'},{id:'c2',label:'爪・頭髪',desc:'爪が短いか、帽子からはみ出していないか'},{id:'c3',label:'粘着ローラー',desc:'入室前にホコリ等を除去したか'},{id:'c4',label:'手指の傷',desc:'傷・手荒れ確認（ある場合は衛生手袋着用）'},{id:'c5',label:'健康状態',desc:'体調不良があれば上長へ相談'},{id:'c6',label:'家族の健康',desc:'家族に異常がある場合は上長へ相談'},{id:'c7',label:'体温',desc:'37℃以上の場合は医療機関へ'}];
+
+// ===== 日次データ =====
+let hState={},hTemps={},hDayOff={},contacts=[];
+let cleanState={},curCW=0,curTW=0,tempV={};
+let avWard='w';
+const avData={w:{},y:{}};
+const avConfig={w:{fryers:3},y:{fryers:2}};
+const days=Array.from({length:31},(_,i)=>i+1);
+let hTypeLabels={fry:'揚げ物',steam:'蒸し物',boil:'煮物・炒め物'};
+let hType='fry';
+const hRows={fry:[],steam:[],boil:[]};
+const records=[];
+
+function resetDailyData(){
+  hState={};hTemps={};hDayOff={};contacts=[];
+  staffList.forEach(s=>{hState[s]={};CHECKS.forEach(c=>hState[s][c.id]=null);hTemps[s]='';});
+  cleanState={};
+  cleanWards.forEach((_,wi)=>{cleanState[wi]={};cleanWards[wi].items.forEach((_,i)=>cleanState[wi][i]={check:null,clean:null});});
+  tempV={};
+  tempWards.forEach((_,wi)=>{tempV[wi]={};tempWards[wi].fridges.forEach((_,i)=>tempV[wi][i]={s:'',e:''});});
+  days.forEach(d=>{avData.w[d]={v:[null,null,null],xchg:[],worker:''};avData.y[d]={v:[null,null],xchg:[],worker:''};});
+  hRows.fry=[];hRows.steam=[];hRows.boil=[];
+}
+
+// ===== 設定 読み書き =====
+function loadSettings(){
+  const s=lsGet(LS_SETTINGS);if(!s)return;
+  if(s.staffList)  staffList=s.staffList;
+  if(s.workerList) workerList=s.workerList;
+  if(s.cleanWards) cleanWards=s.cleanWards;
+  if(s.tempWards)  tempWards=s.tempWards;
+  if(s.thAreas)    thAreas=s.thAreas;
+  if(s.knifeAreas) knifeAreas=s.knifeAreas;
+  if(s.glassAreas) glassAreas=s.glassAreas;
+  if(s.chemItems)  chemItems=s.chemItems;
+}
+function saveSettings(){ lsSet(LS_SETTINGS,{staffList,workerList,cleanWards,tempWards,thAreas,knifeAreas,glassAreas,chemItems}); }
+
+// ===== 今日データ 読み書き =====
+function loadTodayData(){
+  const d=lsGet(LS_TODAY);if(!d||d.dateKey!==currentDateKey)return;
+  if(d.hState) hState=d.hState;
+  if(d.hTemps) hTemps=d.hTemps;
+  if(d.hDayOff) hDayOff=d.hDayOff;
+  if(d.contacts) contacts=d.contacts;
+  if(d.cleanState) cleanState=d.cleanState;
+  if(d.tempV) tempV=d.tempV;
+  if(d.avDataW) Object.assign(avData.w,d.avDataW);
+  if(d.avDataY) Object.assign(avData.y,d.avDataY);
+  if(d.hRows){ Object.assign(hRows,d.hRows); }
+  if(d.hTypeLabels){ hTypeLabels=d.hTypeLabels; Object.keys(hTypeLabels).forEach(k=>{ if(!hRows[k])hRows[k]=[]; }); }
+  if(d.inspector) document.getElementById('inspector').value=d.inspector;
+  if(d.cleanNote) document.getElementById('clean-note').value=d.cleanNote;
+  // 追加データ読み込み
+  const td=lsGet('khg_th_data');    if(td) thData=td;
+  const kd=lsGet('khg_knife_data'); if(kd) knifeData=kd;
+  const gd=lsGet('khg_glass_data'); if(gd) glassData=gd;
+  const cd=loadChemDataMonthly();   if(cd) chemData=cd;
+  if(new Date().getDate()<=3) applyPrevMonthCarry();
+}
+function saveTodayData(){
+  lsSet(LS_TODAY,{dateKey:currentDateKey,hState,hTemps,hDayOff,contacts,cleanState,tempV,avDataW:avData.w,avDataY:avData.y,hRows,hTypeLabels,inspector:document.getElementById('inspector').value,cleanNote:document.getElementById('clean-note').value});
+  lsSet('khg_th_data', thData);
+  lsSet('khg_knife_data', knifeData);
+  lsSet('khg_glass_data', glassData);
+  saveChemDataMonthly();
+}
+function loadRecords(){ const r=lsGet(LS_RECORDS);if(r&&Array.isArray(r)){records.length=0;r.forEach(x=>records.push(x));} }
+function saveRecords(){ lsSet(LS_RECORDS,records); }
+
+// 自動保存
+let autoSaveTimer=null;
+function autoSave(){
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer=setTimeout(()=>{
+    saveTodayData();
+    const el=document.getElementById('save-indicator');
+    el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2000);
+  },1500);
+}
+
+// ===== 初期化 =====
+function init(){
+  loadSettings();resetDailyData();loadTodayData();loadRecords();loadInspectionHistory();renderAll();
+}
+function renderAll(){
+  renderHealth();renderContacts();
+  renderCleanWardTabs();renderCleanGrid();
+  renderTempWardTabs();renderTempGrid();
+  if(!hRows[hType].length)addHRow();else renderHTable();
+  renderHSummary();renderAVRows();renderHist();renderHeatTypeTabs();
+  renderInspectionList();renderInspectionHistory();
+  renderTHAreaTabs();renderTHGrid();
+  renderKnifeAreaTabs();renderKnifeGrid();
+  renderGlassAreaTabs();renderGlassGrid();
+  renderChemGrid();
+}
+
+// ===== 連絡事項 =====
+function renderContacts(){
+  const el=document.getElementById('contact-list');el.innerHTML='';
+  contacts.forEach((c,i)=>{
+    const box=document.createElement('div');
+    box.style.cssText='background:#f8f8f4;border:1px solid #e0e0d8;border-radius:10px;padding:10px';
+    box.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+      <input class="fi" style="flex:1;font-size:13px;padding:6px 9px;font-weight:600" placeholder="件名（例：本日の注意事項）" value="${c.title||''}" oninput="contacts[${i}].title=this.value;autoSave()">
+      <button class="del-btn" style="margin-left:8px;flex-shrink:0" onclick="contacts.splice(${i},1);renderContacts();autoSave()">削除</button>
+    </div>
+    <textarea class="contact-textarea" placeholder="連絡内容を入力してください…" oninput="contacts[${i}].body=this.value;autoSave()">${c.body||''}</textarea>`;
+    el.appendChild(box);
+  });
+}
+function addContact(){contacts.push({title:'',body:''});renderContacts();}
+
+// ===== 健康チェック =====
+function renderHealth(){
+  const el=document.getElementById('health-list');el.innerHTML='';
+  if(!staffList.length){
+    el.innerHTML='<div style="font-size:13px;color:#aaa;padding:16px;text-align:center">「スタッフ編集」ボタンからスタッフを追加してください</div>';
+    document.getElementById('hprog').style.width='0%';document.getElementById('hcount').textContent='0 / 0 名完了';return;
+  }
+  staffList.forEach(name=>{
+    if(!hState[name]){hState[name]={};CHECKS.forEach(c=>hState[name][c.id]=null);}
+    // sid は名前ベースで固定（ランダムにしない→再描画で閉じない）
+    const sid='sc'+name.split('').map(c=>c.charCodeAt(0)).reduce((a,b)=>a+b,0)+'_'+name.length;
+    const isDayOff=!!hDayOff[name];
+    const allDone=!isDayOff && CHECKS.every(c=>hState[name][c.id]!==null);
+    const hasNG=CHECKS.some(c=>hState[name][c.id]===false);
+
+    // 既存カードがあれば再利用、なければ新規作成
+    let card=document.getElementById('card-'+sid);
+    if(!card){
+      card=document.createElement('div');
+      card.id='card-'+sid;
+      card.className='staff-card';
+      el.appendChild(card);
+    }
+
+    const badge=isDayOff
+      ?'<span class="badge" style="background:#e0e0d8;color:#888">休日</span>'
+      :allDone?(hasNG?'<span class="badge b-ng">要対応</span>':'<span class="badge b-ok">完了</span>')
+      :'<span class="badge b-pend">未記入</span>';
+
+    // チェックボックスHTML
+    const cbChecked=isDayOff?'checked':'';
+
+    // カード全体を再構築（初回 or 状態変化時）
+    card.style.opacity=isDayOff?'0.5':'1';
+    card.innerHTML=`
+      <div class="staff-head" onclick="toggleStaff('${sid}')">
+        <div style="display:flex;align-items:center;gap:10px">
+          <label onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:4px">
+            <input type="checkbox" ${cbChecked} style="width:18px;height:18px;cursor:pointer;accent-color:#888"
+              onchange="toggleDayOff(event,'${name}','${sid}')">
+            <span style="font-size:11px;color:#888">休日</span>
+          </label>
+          <div style="font-size:14px;font-weight:600;color:#1a1a1a">${name}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px" id="badge-${sid}">${badge}<span id="chev-${sid}" style="font-size:16px;color:#aaa">▸</span></div>
+      </div>
+      <div class="staff-body" id="sb-${sid}">
+        <div style="padding:10px 12px 12px" id="body-${sid}">
+          ${isDayOff?'<div style="font-size:13px;color:#aaa;padding:8px 0">本日休日</div>':CHECKS.map(c=>{
+            const v=hState[name][c.id];
+            return `<div class="toggle-row" id="row-${sid}-${c.id}">
+              <div><div style="font-size:14px;color:#1a1a1a">${c.label}</div><div style="font-size:11px;color:#999;margin-top:2px">${c.desc}</div></div>
+              <div style="display:flex;gap:6px">
+                <button class="tbn ${v===true?'ok':''}" id="btn-ok-${sid}-${c.id}"
+                  onclick="setHDirect(event,'${name}','${c.id}',true,'${sid}')">○</button>
+                <button class="tbn ${v===false?'ng':''}" id="btn-ng-${sid}-${c.id}"
+                  onclick="setHDirect(event,'${name}','${c.id}',false,'${sid}')">×</button>
+              </div>
+            </div>`;
+          }).join('')}
+          ${!isDayOff&&hState[name]['c7']!==null?`<div style="display:flex;align-items:center;gap:10px;margin-top:5px;padding:8px 12px;background:#f0f0ea;border-radius:8px"><span style="font-size:12px;color:#666">体温（℃）</span>${(()=>{const vals=[''].concat(makeRange(35.0,37.5,0.1).map(v=>v.toFixed(1)));const cur=hTemps[name]||"";const opts=vals.map(v=>`<option value="${v}" ${cur===v?"selected":""}>${v||"未測定"}</option>`).join("");return `<select class="fi" style="width:130px;font-size:14px;color:${parseFloat(cur)>=37?"#dc2626":"#1a1a1a"}" onchange="hTemps['${name}']=this.value;this.style.color=parseFloat(this.value)>=37?'#dc2626':'#1a1a1a';autoSave()">${opts}</select>`;})()}</div>`:''}
+        </div>
+      </div>`;
+  });
+  updateHProg();
+}
+
+function toggleDayOff(e, name, sid){
+  e.stopPropagation();
+  hDayOff[name] = e.target.checked;
+  // カードを再描画
+  const el=document.getElementById('health-list');
+  el.innerHTML='';
+  renderHealth();
+  // 閉じないよう開いていた状態を維持できないが休日切替は許容
+  autoSave();
+}
+
+// ○×ボタンをタップ → DOM直接更新（欄を閉じない）
+function setHDirect(e, name, cid, val, sid){
+  e.stopPropagation();
+  if(!hState[name])hState[name]={};
+  hState[name][cid]=val;
+
+  // ○ボタン
+  const okBtn=document.getElementById('btn-ok-'+sid+'-'+cid);
+  const ngBtn=document.getElementById('btn-ng-'+sid+'-'+cid);
+  if(okBtn) okBtn.className='tbn'+(val===true?' ok':'');
+  if(ngBtn) ngBtn.className='tbn'+(val===false?' ng':'');
+
+  // バッジだけ更新
+  const isDayOff=!!hDayOff[name];
+  const allDone=!isDayOff&&CHECKS.every(c=>hState[name][c.id]!==null);
+  const hasNG=CHECKS.some(c=>hState[name][c.id]===false);
+  const badgeEl=document.getElementById('badge-'+sid);
+  if(badgeEl){
+    const chev=document.getElementById('chev-'+sid);
+    const chevHTML=chev?chev.outerHTML:'';
+    badgeEl.innerHTML=(allDone?(hasNG?'<span class="badge b-ng">要対応</span>':'<span class="badge b-ok">完了</span>'):'<span class="badge b-pend">未記入</span>')+chevHTML;
+  }
+
+  updateHProg();
+  autoSave();
+}
+function toggleStaff(sid){
+  const b=document.getElementById('sb-'+sid),c=document.getElementById('chev-'+sid);
+  if(!b)return;
+  const open=b.style.maxHeight&&b.style.maxHeight!=='0px';
+  b.style.maxHeight=open?'0':'800px';if(c)c.textContent=open?'▸':'▾';
+}
+function updateHProg(){
+  const active=staffList.filter(s=>!hDayOff[s]);
+  const total=active.length;
+  const allTotal=staffList.length;
+  if(!allTotal){document.getElementById('hprog').style.width='0%';document.getElementById('hcount').textContent='0 / 0 名完了';return;}
+  let done=0;
+  active.forEach(s=>{if(hState[s]&&CHECKS.every(c=>hState[s][c.id]!==null))done++;});
+  document.getElementById('hprog').style.width=(total?done/total*100:0)+'%';
+  const offCount=allTotal-total;
+  document.getElementById('hcount').textContent=`${done} / ${total} 名完了`+(offCount?`　（休日 ${offCount} 名）`:'');
+}
+
+let tmpStaff=[];
+function openStaffModal(){tmpStaff=[...staffList];renderStaffModalList();document.getElementById('staff-modal').classList.add('open');}
+function renderStaffModalList(){
+  const el=document.getElementById('staff-modal-list');el.innerHTML='';
+  if(!tmpStaff.length){el.innerHTML='<div style="font-size:13px;color:#aaa;padding:8px">スタッフが登録されていません</div>';return;}
+  tmpStaff.forEach((name,i)=>{
+    const row=document.createElement('div');row.className='modal-item';
+    row.innerHTML=`<input class="fi" value="${name}" oninput="tmpStaff[${i}]=this.value" placeholder="スタッフ名">
+      <button class="del-btn" onclick="tmpStaff.splice(${i},1);renderStaffModalList()">削除</button>`;
+    el.appendChild(row);
+  });
+}
+function addStaff(){tmpStaff.push('');renderStaffModalList();}
+function saveStaff(){
+  staffList=tmpStaff.filter(s=>s.trim());
+  staffList.forEach(s=>{if(!hState[s]){hState[s]={};CHECKS.forEach(c=>hState[s][c.id]=null);}if(!hTemps[s])hTemps[s]='';});
+  saveSettings();renderHealth();closeModal('staff-modal');
+}
+
+// ===== 清掃点検 =====
+function initCleanState(){cleanWards.forEach((_,wi)=>{if(!cleanState[wi])cleanState[wi]={};cleanWards[wi].items.forEach((_,i)=>{if(!cleanState[wi][i])cleanState[wi][i]={check:null,clean:null};});});}
+function renderCleanWardTabs(){
+  const el=document.getElementById('clean-ward-tabs');el.innerHTML='';
+  cleanWards.forEach((w,i)=>{
+    const t=document.createElement('button');t.className='wtab'+(i===curCW?' active':'');
+    t.textContent=w.name;t.onclick=()=>{curCW=i;renderCleanWardTabs();renderCleanGrid();};el.appendChild(t);
+  });
+  document.getElementById('clean-ward-title').textContent=(cleanWards[curCW]?cleanWards[curCW].name:'')+'　清掃点検';
+}
+function renderCleanGrid(){
+  initCleanState();const w=cleanWards[curCW];if(!w)return;
+  const el=document.getElementById('clean-grid');el.innerHTML='';
+  w.items.forEach((it,i)=>{
+    const st=cleanState[curCW][i]||{check:null,clean:null};
+    const div=document.createElement('div');div.className='clean-item';
+    div.innerHTML=`<div style="font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:3px">${it.label}</div>
+      <div style="font-size:11px;color:#999;margin-bottom:7px">${it.freq}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:5px"><span style="font-size:12px;color:#666">点検</span>
+          <button class="tbn ${st.check===true?'ok':''}" style="min-width:44px;padding:7px 11px;font-size:15px" onclick="setClean(${curCW},${i},'check',true)">○</button>
+          <button class="tbn ${st.check===false?'ng':''}" style="min-width:44px;padding:7px 11px;font-size:15px" onclick="setClean(${curCW},${i},'check',false)">×</button>
+        </div>
+        ${it.hasClean?`<div style="display:flex;align-items:center;gap:5px"><span style="font-size:12px;color:#666">清掃</span>
+          <button class="tbn ${st.clean===true?'ok':''}" style="min-width:44px;padding:7px 11px;font-size:15px" onclick="setClean(${curCW},${i},'clean',true)">○</button>
+          <button class="tbn ${st.clean===false?'ng':''}" style="min-width:44px;padding:7px 11px;font-size:15px" onclick="setClean(${curCW},${i},'clean',false)">×</button>
+        </div>`:''}
+      </div>`;
+    el.appendChild(div);
+  });
+}
+function setClean(wi,i,key,val){if(!cleanState[wi])cleanState[wi]={};if(!cleanState[wi][i])cleanState[wi][i]={check:null,clean:null};cleanState[wi][i][key]=val;renderCleanGrid();autoSave();}
+
+let tmpCleanWards=[];
+function openCleanWardModal(){tmpCleanWards=cleanWards.map(w=>({name:w.name}));renderCleanWardModalList();document.getElementById('clean-ward-modal').classList.add('open');}
+function renderCleanWardModalList(){
+  const el=document.getElementById('clean-ward-modal-list');el.innerHTML='';
+  tmpCleanWards.forEach((w,i)=>{
+    const row=document.createElement('div');row.className='modal-item';
+    row.innerHTML=`<input class="fi" value="${w.name}" oninput="tmpCleanWards[${i}].name=this.value" placeholder="施設名">
+      <button class="del-btn" onclick="tmpCleanWards.splice(${i},1);renderCleanWardModalList()">削除</button>`;
+    el.appendChild(row);
+  });
+}
+function addCleanWard(){tmpCleanWards.push({name:''});renderCleanWardModalList();}
+function saveCleanWard(){
+  cleanWards=tmpCleanWards.filter(w=>w.name.trim()).map(w=>{const ex=cleanWards.find(x=>x.name===w.name);return ex||{name:w.name,items:[{label:'床の清掃',freq:'毎日',hasClean:false},{label:'作業台の清掃',freq:'毎日',hasClean:false},{label:'冷蔵庫',freq:'毎日点検/週1回清掃',hasClean:true},{label:'冷凍庫',freq:'毎日点検/週1回清掃',hasClean:true},{label:'従業員の衛生教育',freq:'週1回',hasClean:false},{label:'使用水の確認',freq:'毎日',hasClean:false},{label:'ねずみ・害虫の確認',freq:'毎日',hasClean:false}]};});
+  curCW=0;saveSettings();renderCleanWardTabs();renderCleanGrid();closeModal('clean-ward-modal');
+}
+
+// ===== 温度管理 =====
+function initTempV(){tempWards.forEach((_,wi)=>{if(!tempV[wi])tempV[wi]={};tempWards[wi].fridges.forEach((_,i)=>{if(!tempV[wi][i])tempV[wi][i]={s:'',e:''};});});}
+function renderTempWardTabs(){
+  const el=document.getElementById('temp-ward-tabs');el.innerHTML='';
+  tempWards.forEach((w,i)=>{
+    const t=document.createElement('button');t.className='wtab'+(i===curTW?' active':'');
+    t.textContent=w.name;t.onclick=()=>{curTW=i;renderTempWardTabs();renderTempGrid();};el.appendChild(t);
+  });
+  document.getElementById('temp-ward-title').textContent=(tempWards[curTW]?tempWards[curTW].name:'')+'　冷蔵・冷凍温度管理';
+}
+function renderTempGrid(){
+  initTempV();const w=tempWards[curTW];if(!w)return;
+  const el=document.getElementById('temp-grid');el.innerHTML='';
+  w.fridges.forEach((f,i)=>{
+    const sv=tempV[curTW][i].s,ev=tempV[curTW][i].e;
+    function cls(v){if(!v)return '';return parseFloat(v)<=f.limit?'tok':'twarn';}
+    const row=document.createElement('div');row.className='temp-row';
+    row.innerHTML=`<div><div style="font-size:13px;font-weight:600;color:#1a1a1a">${f.name}</div>
+      <div style="font-size:11px;color:#999;margin-top:2px">設定 ${f.set}　管理 ${f.limit}℃以下　${f.frz?'冷凍':'冷蔵'}</div></div>
+      <div><div style="font-size:11px;color:#666;margin-bottom:3px">始業</div>
+        <select class="ti ${cls(sv)}" style="font-size:14px;padding:6px 3px" onchange="saveTmpV(${curTW},${i},'s',this.value,this,${f.limit})">${buildFridgeReel(f.set,sv)}</select>
+      </div>
+      <div><div style="font-size:11px;color:#666;margin-bottom:3px">終業</div>
+        <select class="ti ${cls(ev)}" style="font-size:14px;padding:6px 3px" onchange="saveTmpV(${curTW},${i},'e',this.value,this,${f.limit})">${buildFridgeReel(f.set,ev)}</select>
+      </div>`;
+    el.appendChild(row);
+  });
+}
+function saveTmpV(wi,i,slot,val,el,limit){
+  initTempV();tempV[wi][i][slot]=val;
+  if(!val){el.className='ti';autoSave();return;}
+  el.className='ti '+(parseFloat(val)<=limit?'tok':'twarn');autoSave();
+}
+function addTempWardQuick(){
+  const name = prompt('新しいエリア名を入力してください');
+  if(!name || !name.trim()) return;
+  tempWards.push({name:name.trim(), fridges:[{name:'冷蔵庫1',set:'5',limit:10,frz:false}]});
+  tempV[tempWards.length-1]={};
+  tempWards[tempWards.length-1].fridges.forEach((_,i)=>tempV[tempWards.length-1][i]={s:'',e:''});
+  saveSettings();
+  renderTempWardTabs();
+  renderTempGrid();
+}
+function markTime(slot){const now=new Date();alert(`${slot==='s'?'始業':'終業'} (${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')})\n各冷蔵庫の温度を入力してください`);}
+
+let tmpTempItems=[];
+function openTempEditModal(){const w=tempWards[curTW];tmpTempItems=w?w.fridges.map(f=>({...f})):[];document.getElementById('temp-edit-modal-title').textContent=(w?w.name:'')+'　機器編集';renderTempEditList();document.getElementById('temp-edit-modal').classList.add('open');}
+function renderTempEditList(){
+  const el=document.getElementById('temp-edit-list');el.innerHTML='';
+  tmpTempItems.forEach((f,i)=>{
+    const row=document.createElement('div');row.style.cssText='display:grid;grid-template-columns:1fr 66px 66px auto auto;gap:5px;align-items:center;margin-bottom:7px';
+    row.innerHTML=`<input class="fi" style="font-size:13px" value="${f.name}" placeholder="品名" oninput="tmpTempItems[${i}].name=this.value">
+      <input class="fi" style="font-size:13px;text-align:center" value="${f.set}" placeholder="5℃" oninput="tmpTempItems[${i}].set=this.value">
+      <input class="fi" type="number" style="font-size:13px;text-align:center" value="${f.limit}" placeholder="10" oninput="tmpTempItems[${i}].limit=parseFloat(this.value)">
+      <select class="fi" style="font-size:13px;padding:7px 5px" onchange="tmpTempItems[${i}].frz=this.value==='frz'">
+        <option value="ref" ${!f.frz?'selected':''}>冷蔵</option>
+        <option value="frz" ${f.frz?'selected':''}>冷凍</option>
+      </select>
+      <button class="del-btn" onclick="tmpTempItems.splice(${i},1);renderTempEditList()">削除</button>`;
+    el.appendChild(row);
+  });
+}
+function addTempItem(){tmpTempItems.push({name:'',set:'5℃',limit:10,frz:false});renderTempEditList();}
+function saveTempItems(){if(!tempWards[curTW])return;tempWards[curTW].fridges=tmpTempItems.filter(f=>f.name.trim());saveSettings();initTempV();renderTempGrid();closeModal('temp-edit-modal');}
+
+// ===== 加熱冷却 =====
+function renderHeatTypeTabs(){
+  const el=document.getElementById('heat-type-tabs');
+  if(!el) return;
+  el.innerHTML='';
+  Object.entries(hTypeLabels).forEach(([key,label],idx)=>{
+    const btn=document.createElement('button');
+    btn.className='wtab'+(key===hType?' active':'');
+    btn.textContent=label;
+    btn.onclick=()=>{hType=key;renderHeatTypeTabs();renderHTable();};
+    el.appendChild(btn);
+  });
+}
+function addHeatType(){
+  const name=prompt('新しい種別名を入力してください（例：焼き物）');
+  if(!name||!name.trim())return;
+  const key='custom_'+Date.now();
+  hTypeLabels[key]=name.trim();
+  hRows[key]=[];
+  hType=key;
+  renderHeatTypeTabs();
+  renderHTable();
+  autoSave();
+}
+function setHType(btn,t){hType=t;renderHeatTypeTabs();renderHTable();}
+function addHRow(){hRows[hType].push({name:'',temp:'',start:'',core:'',worker:'',cs:'',ct:''});renderHTable();}
+function renderHTable(){
+  const tbody=document.getElementById('heat-body');tbody.innerHTML='';
+  if(!hRows[hType].length){addHRow();return;}
+  hRows[hType].forEach((r,i)=>{
+    const n=parseFloat(r.core);
+    const cs=r.core?(n>=85?'border-color:#86efac;background:#f0fdf4':'border-color:#fca5a5;background:#fff5f5'):'';
+    const wopts=workerList.map(w=>`<option value="${w}" ${r.worker===w?'selected':''}>${w}</option>`).join('');
+    const tr=document.createElement('tr');
+    const oilVals=[''].concat(makeRange(50,250,5).map(v=>String(v)));
+    const oilOpts=oilVals.map(v=>`<option value="${v}" ${r.temp===v?'selected':''}>${v||'--'}</option>`).join('');
+    const coreVals=[''].concat(makeRange(60,100,1).map(v=>String(v)));
+    const coreOpts=coreVals.map(v=>`<option value="${v}" ${r.core===v?'selected':''}>${v||(v===''?'--':v)}</option>`).join('');
+    const ctVals=[''].concat(makeRange(0,30,1).map(v=>String(v)));
+    const ctOpts=ctVals.map(v=>`<option value="${v}" ${r.ct===v?'selected':''}>${v||'--'}</option>`).join('');
+    tr.innerHTML=`<td><input value="${r.name}" placeholder="品名" oninput="hRows['${hType}'][${i}].name=this.value;autoSave()"></td>
+      <td><select style="font-size:13px;padding:5px 2px;border:1px solid #d8d8d0;border-radius:7px;background:#fafafa;width:100%" onchange="hRows['${hType}'][${i}].temp=this.value;autoSave()">${oilOpts}</select></td>
+      <td><input type="time" value="${r.start}" oninput="hRows['${hType}'][${i}].start=this.value;autoSave()"></td>
+      <td><select style="font-size:13px;padding:5px 2px;border:1px solid #d8d8d0;border-radius:7px;background:#fafafa;width:100%;color:${n>=85?'#15803d':n>0?'#dc2626':'#1a1a1a'}" onchange="hRows['${hType}'][${i}].core=this.value;updHCoreSelect(${i},this);autoSave()">${coreOpts}</select></td>
+      <td><select style="font-size:13px;padding:5px 2px;border:1px solid #d8d8d0;border-radius:7px;background:#fafafa;width:100%;font-family:inherit" onchange="hRows['${hType}'][${i}].worker=this.value;autoSave()"><option value="">担当者</option>${wopts}</select></td>
+      <td><input type="time" value="${r.cs}" oninput="hRows['${hType}'][${i}].cs=this.value;autoSave()"></td>
+      <td><select style="font-size:13px;padding:5px 2px;border:1px solid #d8d8d0;border-radius:7px;background:#fafafa;width:100%" onchange="hRows['${hType}'][${i}].ct=this.value;autoSave()">${ctOpts}</select></td>
+      <td><button class="del-btn" onclick="hRows['${hType}'].splice(${i},1);renderHTable();autoSave()">削除</button></td>`;
+    tbody.appendChild(tr);
+  });
+  renderHSummary();
+}
+function updHCoreSelect(i,el){
+  const v=el.value; const n=parseFloat(v)||0;
+  el.style.color=n>=85?'#15803d':n>0?'#dc2626':'#1a1a1a';
+  renderHSummary();
+}
+function updHCore(i,el){
+  const v=el.value;hRows[hType][i].core=v;
+  if(!v){el.style.borderColor='';el.style.background='';renderHSummary();autoSave();return;}
+  const n=parseFloat(v);el.style.borderColor=n>=85?'#86efac':'#fca5a5';el.style.background=n>=85?'#f0fdf4':'#fff5f5';
+  renderHSummary();autoSave();
+}
+function renderHSummary(){
+  const el=document.getElementById('heat-summary');
+  const all=Object.values(hRows).flat().filter(r=>r.name);
+  if(!all.length){el.innerHTML='<div style="font-size:13px;color:#aaa">品名を入力すると表示されます</div>';return;}
+  let html='';
+  Object.entries(hRows).forEach(([t,rows])=>{
+    const filled=rows.filter(r=>r.name);if(!filled.length)return;
+    html+=`<div style="font-size:12px;color:#666;margin:8px 0 4px;font-weight:600">${hTypeLabels[t]||t}</div>`;
+    filled.forEach(r=>{
+      const n=parseFloat(r.core);const ok=n>=85;
+      html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #eee;font-size:13px">
+        <span>${r.name}${r.worker?' ('+r.worker+')':''}</span>
+        <div style="display:flex;gap:5px">${r.core?`<span class="badge ${ok?'b-ok':'b-ng'}">芯温${r.core}℃</span>`:''}${r.cs?`<span class="badge b-ok">冷却完了</span>`:''}</div>
+      </div>`;
+    });
+  });
+  el.innerHTML=html;
+}
+
+let tmpWorkers=[];
+function openWorkerModal(){tmpWorkers=[...workerList];renderWorkerModalList();document.getElementById('worker-modal').classList.add('open');}
+function renderWorkerModalList(){
+  const el=document.getElementById('worker-modal-list');el.innerHTML='';
+  if(!tmpWorkers.length){el.innerHTML='<div style="font-size:13px;color:#aaa;padding:8px">担当者が登録されていません</div>';return;}
+  tmpWorkers.forEach((name,i)=>{
+    const row=document.createElement('div');row.className='modal-item';
+    row.innerHTML=`<input class="fi" value="${name}" oninput="tmpWorkers[${i}]=this.value" placeholder="担当者名">
+      <button class="del-btn" onclick="tmpWorkers.splice(${i},1);renderWorkerModalList()">削除</button>`;
+    el.appendChild(row);
+  });
+}
+function addWorker(){tmpWorkers.push('');renderWorkerModalList();}
+function saveWorkers(){workerList=tmpWorkers.filter(w=>w.trim());saveSettings();renderHTable();closeModal('worker-modal');}
+
+// ===== 油脂AV値 =====
+function setAVWard(btn,w){document.querySelectorAll('#page4 .wtab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');avWard=w;renderAVRows();}
+function renderAVRows(){
+  const cfg=avConfig[avWard];
+  const cols='52px '+Array.from({length:cfg.fryers},()=>'1fr').join(' ')+' 1fr 90px';
+  const hEl=document.getElementById('av-header');
+  hEl.style.gridTemplateColumns=cols;
+  hEl.innerHTML='<div>日付</div>'+Array.from({length:cfg.fryers},(_,i)=>`<div style="text-align:center">フライヤー${i+1}</div>`).join('')+'<div style="text-align:center">交換（○）</div><div style="text-align:center">作業者</div>';
+  const el=document.getElementById('av-rows');el.innerHTML='';
+  days.forEach(d=>{
+    if(!avData[avWard][d])avData[avWard][d]={v:Array(cfg.fryers).fill(null),xchg:[],worker:''};
+    const r=avData[avWard][d];
+    const row=document.createElement('div');row.className='av-row';row.style.gridTemplateColumns=cols;
+    const inputs=Array.from({length:cfg.fryers},(_,j)=>{
+      const v=r.v[j];const vs=v!==null&&v!==''?(parseFloat(v)>2.5?'border-color:#fca5a5;background:#fff5f5':''):'';
+      return `<select class="fi" style="font-size:14px;padding:6px 3px;text-align:center" onchange="updAV(${d},${j},this.value,this)">${buildAVReel(v)}</select>`;
+    }).join('');
+    const xbtns=Array.from({length:cfg.fryers},(_,n)=>`<button class="tbn ${r.xchg.includes(n+1)?'ok':''}" style="min-width:32px;padding:6px 9px;font-size:13px" onclick="toggleXchg(${d},${n+1})">${n+1}</button>`).join('');
+    row.innerHTML=`<div style="font-size:13px;color:#666;text-align:center;padding-top:4px">${d}日</div>
+      ${inputs}
+      <div style="display:flex;gap:4px;align-items:center;justify-content:center">${xbtns}</div>
+      <input class="fi" style="font-size:13px" placeholder="作業者" value="${r.worker}" oninput="avData['${avWard}'][${d}].worker=this.value;autoSave()">`;
+    el.appendChild(row);
+  });
+}
+function updAV(d,j,v,el){
+  avData[avWard][d].v[j]=v;
+  if(!v){el.style.borderColor='';el.style.background='';autoSave();return;}
+  el.style.borderColor=parseFloat(v)>2.5?'#fca5a5':'';el.style.background=parseFloat(v)>2.5?'#fff5f5':'';autoSave();
+}
+function toggleXchg(d,n){const arr=avData[avWard][d].xchg;const idx=arr.indexOf(n);idx>=0?arr.splice(idx,1):arr.push(n);renderAVRows();autoSave();}
+
+// ===== 履歴 =====
+function renderHist(){
+  const el=document.getElementById('hist-list');const em=document.getElementById('hist-empty');
+  el.innerHTML='';
+  if(!records.length){em.style.display='block';return;}
+  em.style.display='none';
+  records.slice().reverse().forEach((rec,ri)=>{
+    const idx=records.length-1-ri;
+    const row=document.createElement('div');row.className='hist-row';
+    row.innerHTML=`<div>
+      <div style="font-size:14px;font-weight:600;color:#1a1a1a">${rec.date}</div>
+      <div style="font-size:12px;color:#666;margin-top:2px">スタッフ ${rec.healthDone}/${rec.healthTotal}名　${rec.contactCount?'連絡事項'+rec.contactCount+'件　':''}${rec.warnings?'<span class="badge b-ng">要確認'+rec.warnings+'件</span>':''}</div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <span class="badge ${rec.complete?'b-ok':'b-pend'}">${rec.complete?'完了':'一部未入力'}</span>
+      <span style="color:#aaa;font-size:18px">▸</span>
+    </div>`;
+    row.onclick=()=>showHistDetail(idx);el.appendChild(row);
+  });
+}
+function showHistDetail(idx){
+  const rec=records[idx];
+  document.getElementById('hist-detail').style.display='block';
+  document.getElementById('hist-detail-title').textContent=rec.date+' 記録詳細';
+  let ch='';
+  if(rec.contacts&&rec.contacts.length){
+    ch='<div style="margin-top:12px"><div style="font-size:13px;font-weight:600;margin-bottom:7px">連絡事項</div>';
+    rec.contacts.forEach(c=>{ch+=`<div style="padding:9px 12px;background:#f8f8f4;border-radius:9px;margin-bottom:6px">${c.title?`<div style="font-size:13px;font-weight:600;margin-bottom:4px">${c.title}</div>`:''}<div style="font-size:13px;color:#555;white-space:pre-wrap">${c.body}</div></div>`;});
+    ch+='</div>';
+  }
+  document.getElementById('hist-detail-body').innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:12px">
+    <div style="background:#f8f8f4;border-radius:10px;padding:11px"><div style="font-size:11px;color:#666">健康チェック</div><div style="font-size:22px;font-weight:600;margin-top:4px">${rec.healthDone}/${rec.healthTotal}名</div></div>
+    <div style="background:#f8f8f4;border-radius:10px;padding:11px"><div style="font-size:11px;color:#666">要対応</div><div style="font-size:22px;font-weight:600;color:${rec.warnings?'#dc2626':'#15803d'};margin-top:4px">${rec.warnings}件</div></div>
+    <div style="background:#f8f8f4;border-radius:10px;padding:11px"><div style="font-size:11px;color:#666">保存時刻</div><div style="font-size:15px;font-weight:600;margin-top:4px">${rec.savedAt}</div></div>
+  </div>${ch}`;
+  document.getElementById('hist-detail').scrollIntoView({behavior:'smooth'});
+}
+
+// ===== 保存 =====
+function doSaveInternal(isAuto=false){
+  const total=staffList.length;let done=0,warnings=0;
+  staffList.forEach(s=>{if(hState[s]&&CHECKS.every(c=>hState[s][c.id]!==null))done++;if(hState[s]&&CHECKS.some(c=>hState[s][c.id]===false))warnings++;});
+  const complete=done===total&&total>0;
+  const now=new Date();
+  const savedContacts=contacts.filter(c=>c.title||c.body).map(c=>({...c}));
+  const existIdx=records.findIndex(r=>r.dateKey===currentDateKey);
+  const rec={date:fmtDate(new Date()),dateKey:currentDateKey,healthDone:done,healthTotal:total,warnings,complete,contactCount:savedContacts.length,contacts:savedContacts,savedAt:now.toLocaleTimeString('ja-JP')};
+  if(existIdx>=0)records[existIdx]=rec;else records.push(rec);
+  saveTodayData();saveRecords();renderHist();
+  if(!isAuto){switchTab(5);setTimeout(()=>alert(`✅ ${fmtDate(new Date())} の記録を保存しました\n健康チェック: ${done}/${total}名完了\n要対応: ${warnings}件${savedContacts.length?'\n連絡事項: '+savedContacts.length+'件':''}`),100);}
+}
+function doSave(){doSaveInternal(false);}
+
+// ===== 共通 =====
+function switchTab(i){document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i===j));document.querySelectorAll('.page').forEach((p,j)=>p.classList.toggle('active',i===j));}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');}));
+
+// ===== データ管理 =====
+function openDataModal(){ document.getElementById('data-modal').classList.add('open'); }
+
+function exportJSON(){
+  const payload = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    settings: lsGet(LS_SETTINGS),
+    today:    lsGet(LS_TODAY),
+    records:  lsGet(LS_RECORDS),
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const dateStr = fmtKey(new Date()).replace(/-/g,'');
+  a.href = url; a.download = `衛生管理記録_${dateStr}.json`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function importJSON(input){
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const data = JSON.parse(e.target.result);
+      if(!data.version) throw new Error('形式が違います');
+      if(!confirm('現在のデータを上書きしてインポートします。よろしいですか？')) return;
+      if(data.settings) lsSet(LS_SETTINGS, data.settings);
+      if(data.today)    lsSet(LS_TODAY,    data.today);
+      if(data.records)  lsSet(LS_RECORDS,  data.records);
+      loadSettings(); resetDailyData(); loadTodayData(); loadRecords(); renderAll();
+      closeModal('data-modal');
+      alert('✅ インポートが完了しました');
+    } catch(err){
+      alert('❌ 読み込みに失敗しました。ファイルを確認してください。\n'+err.message);
+    }
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+
+function exportExcel(){
+  const recs = lsGet(LS_RECORDS) || [];
+  if(!recs.length){ alert('まだ保存された記録がありません。'); return; }
+
+  // CSVをExcel互換UTF-8 BOM付きで書き出す（xlsxライブラリ不要）
+  const BOM = '\uFEFF';
+  let csv = BOM + '日付,健康チェック完了,要対応件数,連絡事項件数,完了状態,保存時刻\n';
+  recs.forEach(r => {
+    const cols = [
+      r.date,
+      `${r.healthDone}/${r.healthTotal}名`,
+      r.warnings + '件',
+      (r.contactCount||0) + '件',
+      r.complete ? '完了' : '一部未入力',
+      r.savedAt||''
+    ];
+    csv += cols.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',') + '\n';
+  });
+
+  // 連絡事項シートも追加
+  csv += '\n連絡事項一覧\n日付,件名,内容\n';
+  recs.forEach(r => {
+    if(r.contacts && r.contacts.length){
+      r.contacts.forEach(c => {
+        csv += [r.date, c.title||'', c.body||''].map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',') + '\n';
+      });
+    }
+  });
+
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const dateStr = fmtKey(new Date()).replace(/-/g,'');
+  a.href = url; a.download = `衛生管理記録_${dateStr}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  setTimeout(()=>alert('💡 ファイルをExcelで開くと表形式で確認できます。\n（ファイル形式はCSVですがExcelで直接開けます）'),300);
+}
+
+function clearAllData(){
+  if(!confirm('本当に全データを消去しますか？\nこの操作は元に戻せません。')) return;
+  if(!confirm('最終確認です。全データを消去します。')) return;
+  localStorage.removeItem(LS_SETTINGS);
+  localStorage.removeItem(LS_TODAY);
+  localStorage.removeItem(LS_RECORDS);
+  staffList=[]; workerList=[]; cleanWards=getDefaultCleanWards(); tempWards=getDefaultTempWards();
+  records.length=0; resetDailyData(); renderAll();
+  closeModal('data-modal');
+  alert('✅ 全データを消去しました');
+}
+
+
+// ===== リール選択ヘルパー =====
+function makeReel(values, currentVal, onchangeCode, style=''){
+  const opts = values.map(v=>`<option value="${v}" ${String(currentVal)===String(v)?'selected':''}>${v}</option>`).join('');
+  return `<select class="fi" style="font-size:14px;padding:6px 4px;text-align:center;${style}" onchange="${onchangeCode}">${opts}</select>`;
+}
+function makeRange(min, max, step){
+  const vals=[];
+  for(let v=min; v<=max+0.0001; v=Math.round((v+step)*1000)/1000) vals.push(parseFloat(v.toFixed(2)));
+  return vals;
+}
+function buildAVReel(cur){
+  const vals=[''].concat(makeRange(0,2.5,0.5).map(v=>v.toFixed(1)));
+  return vals.map(v=>`<option value="${v}" ${String(cur)===v?'selected':''}>${v||'--'}</option>`).join('');
+}
+function buildFridgeReel(setTemp, cur){
+  const base=parseFloat(setTemp)||0;
+  const vals=[''].concat(makeRange(base-10,base+10,0.5).map(v=>v.toFixed(1)));
+  return vals.map(v=>`<option value="${v}" ${String(cur)===v?'selected':''}>${v||'--'}</option>`).join('');
+}
+
+
+function buildFridgeReel(setTemp, curVal){
+  const base = parseFloat(setTemp) || 0;
+  const vals = [''].concat(makeRange(base-10, base+10, 0.5).map(v=>v.toFixed(1)));
+  return vals.map(v=>`<option value="${v}" ${String(curVal)===v?'selected':''}>${v||'--'}</option>`).join('');
+}
+function buildAVReel(curVal){
+  const vals = [''].concat(makeRange(0, 2.5, 0.5).map(v=>v.toFixed(1)));
+  return vals.map(v=>`<option value="${v}" ${String(curVal)===String(v)?'selected':''}>${v||'--'}</option>`).join('');
+}
+function buildTHReel(type, curVal){
+  const vals = type==='temp'
+    ? [''].concat(makeRange(10, 40, 1).map(v=>String(v)))
+    : [''].concat(makeRange(0, 100, 10).map(v=>String(v)));
+  return vals.map(v=>`<option value="${v}" ${String(curVal)===String(v)?'selected':''}>${v||'--'}</option>`).join('');
+}
+
+// ===== 検収記録 =====
+const LS_INSPECTIONS = 'khg_inspections';
+let inspectionEntries = []; // 現在編集中のエントリー群
+const inspectionHistory = []; // 保存済み
+
+const RECEIVERS = ['川島','阿部','野島','他'];
+const CHECK_ITEMS = ['梱包','異物','鮮度・品質'];
+const STORAGE_TYPES = ['常温','チルド','冷凍'];
+
+function loadInspectionHistory(){
+  const d = lsGet(LS_INSPECTIONS);
+  if(d && Array.isArray(d)){ inspectionHistory.length=0; d.forEach(x=>inspectionHistory.push(x)); }
+}
+function saveInspectionHistory(){ lsSet(LS_INSPECTIONS, inspectionHistory); }
+
+// PDF読み込み
+async function loadPDFs(input){
+  const files = Array.from(input.files);
+  if(!files.length) return;
+
+  // ローディング表示
+  const emEl = document.getElementById('inspection-empty');
+  emEl.style.display='block';
+  emEl.textContent='PDF読み込み中…';
+
+  // PDF.jsをCDNから動的ロード
+  if(!window.pdfjsLib){
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+      s.onload=res; s.onerror=rej;
+      document.head.appendChild(s);
+    });
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+
+  for(const file of files){
+    const ab = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({data:ab}).promise;
+    for(let p=1; p<=pdf.numPages; p++){
+      const page = await pdf.getPage(p);
+      const viewport = page.getViewport({scale:1});
+      const pageHeight = viewport.height;
+      const tc = await page.getTextContent();
+      // ページ高さを渡してtop座標変換を行う
+      const entry = parsePDFWords(tc.items, file.name, pageHeight);
+      if(entry) inspectionEntries.push(entry);
+    }
+  }
+  input.value='';
+  emEl.textContent='PDFを取り込むか「手動で追加」をタップしてください';
+  renderInspectionList();
+}
+
+// 座標ベースのPDFパース（行グループ方式）
+function parsePDFWords(items, filename, pageHeight){
+  const ph = pageHeight || 841;
+
+  // 全ワードをx/top（上端から）に正規化
+  const words = items
+    .map(it=>({
+      text: it.str.trim(),
+      x:    it.transform[4],
+      top:  ph - it.transform[5] - (it.height || 0),
+    }))
+    .filter(w=>w.text);
+
+  // ---- 行グループ化 (top差±4を同一行) ----
+  const rowBuckets = [];
+  for(const w of words){
+    let bucket = rowBuckets.find(b=>Math.abs(b.top - w.top) <= 4);
+    if(!bucket){ bucket={top:w.top, words:[]}; rowBuckets.push(bucket); }
+    bucket.words.push(w);
+  }
+  rowBuckets.sort((a,b)=>a.top-b.top);
+  for(const b of rowBuckets) b.words.sort((a,b2)=>a.x-b2.x);
+
+  // ---- 業者名: 全テキストを結合して正規表現で抽出 ----
+  // 「業者名 〇〇〇 様」というパターンをそのまま取得
+  const allText = items.map(it=>it.str).join(' ');
+  let vendor = '';
+  // 「業者名」の後ろから「様」までを抽出
+  const vMatch = allText.match(/業者名\s*(.+?)\s*様/);
+  if(vMatch){
+    vendor = vMatch[1].trim() + ' 様';
+    // 「受領者」「厨房長」などヘッダー混入ワードを除去
+    vendor = vendor.replace(/(受領者|厨房長|管理部|拠点名).*/,'').trim();
+  }
+
+  // ---- 発注年月日: 正規表現で抽出 ----
+  let orderDate = '';
+  const dMatch = allText.match(/発注年月日\s*([\d]{4}\/[\d]{2}\/[\d]{2})/);
+  if(dMatch) orderDate = dMatch[1];
+
+  const todayISO = new Date().toISOString().slice(0,10);
+
+  const SKIP = new Set([
+    '業者名','発注年月日','受領者','厨房長','管理部','拠点名','検収記録簿',
+    '品','目','名','数','量','川島','阿部','野島','他','合計','単位',
+    '納品時','刻','賞味期限','納品温度','梱包','異物','鮮度・','品質',
+    '常温保ﾁﾙﾄﾞ保冷凍保','存品','（検査完了日）','検','収','記','録',
+    '（','納品時に記入','）','＜本社１年間保管＞','（株）味工房スイセン',
+    '様','：新厨房／洋食厨房','川島＝川島','信行｜阿部＝阿部明浩｜野島＝野島',
+    '隆介｜他＝その他の担当者','新厨房／洋食厨房（株式会社味工房スイセン）',
+    '※返品の必要な商品については必ず責任者に確認すること','1','2','3','/',
+  ]);
+
+  const items_out = [];
+
+  for(const b of rowBuckets){
+    // この行に合計列の数値（x:390~425）があるか
+    const qtyW = b.words.find(w=>w.x>=390 && w.x<=425 && /^\d+\.\d+$/.test(w.text));
+    if(!qtyW) continue;
+
+    const qty = parseFloat(qtyW.text);
+
+    // 単位
+    const unitW = b.words.find(w=>w.x>=428 && w.x<=468 && /^(kg|袋|本|個|枚|ﾊﾟｯｸ|パック)$/.test(w.text));
+    const unit = unitW ? unitW.text : 'kg';
+
+    // 賞味期限 MM/DD → YYYY-MM-DD
+    const expW = b.words.find(w=>w.x>=460 && w.x<=505 && /^\d{2}\/\d{2}$/.test(w.text));
+    let expiry = '';
+    if(expW){
+      const [mm,dd] = expW.text.split('/');
+      const now = new Date();
+      const useYear = parseInt(mm) < now.getMonth()+1 ? now.getFullYear()+1 : now.getFullYear();
+      expiry = `${useYear}-${mm}-${dd}`;
+    }
+
+    // 品名: この行のtopから±30以内にある x:60~215 のワードを結合
+    // 複数の行バケツにまたがる品名に対応
+    const bTop = b.top;
+    const nameWords = [];
+    for(const b2 of rowBuckets){
+      if(Math.abs(b2.top - bTop) > 30) continue;
+      for(const w of b2.words){
+        if(w.x < 60 || w.x > 215) continue;
+        if(SKIP.has(w.text)) continue;
+        if(/^[\d.\/]+$/.test(w.text)) continue;
+        if(w.text.length <= 1) continue;
+        if(/^\d+[ｇｋｇmMlLkg・\/]/.test(w.text)) continue;
+        if(/^\d+個入/.test(w.text)) continue;
+        if(w.text.includes('味工房') || w.text.includes('洋食厨房')) continue;
+        if(w.text.includes('川島食品') || w.text.includes('伊藤食品') || w.text.includes('高瀬物産')) continue;
+        nameWords.push(w);
+      }
+    }
+    nameWords.sort((a,b2)=>a.top-b2.top || a.x-b2.x);
+    const name = nameWords.map(w=>w.text).join('').trim();
+    if(!name) continue;
+
+    const last = items_out[items_out.length-1];
+    if(last && last.name === name) continue;
+
+    items_out.push({
+      name, qty, unit, storage:'', expiry, temp:'',
+      checks:{梱包:'',異物:'','鮮度・品質':''},
+      receivers:[], deliveryDate:todayISO, deliveryTime:'',
+    });
+  }
+
+  if(!items_out.length){
+    items_out.push({name:'',qty:'',unit:'kg',storage:'',expiry:'',temp:'',checks:{梱包:'',異物:'','鮮度・品質':''},receivers:[],deliveryDate:todayISO,deliveryTime:''});
+  }
+
+  return { id:Date.now()+Math.random(), vendor, orderDate, items:items_out, note:'', source:filename };
+}
+
+function addManualEntry(){
+  const y = new Date().getFullYear();
+  inspectionEntries.push({
+    id: Date.now() + Math.random(),
+    vendor: '',
+    orderDate: fmtKey(new Date()),
+    items: [{ name:'', qty:'', unit:'kg', storage:'', expiryYear:y, expiryMonth:'', expiryDay:'', temp:'', checks:{梱包:'',異物:'','鮮度・品質':''}, receivers:[], deliveryDate:fmtKey(new Date()), deliveryTime:'' }],
+    note: '',
+    source: '手動入力',
+  });
+  renderInspectionList();
+}
+
+function renderInspectionList(){
+  const el = document.getElementById('inspection-list');
+  const empty = document.getElementById('inspection-empty');
+  const actions = document.getElementById('inspection-actions');
+
+  if(!inspectionEntries.length){
+    empty.style.display='block'; el.innerHTML=''; el.appendChild(empty);
+    if(actions) actions.style.display='none';
+    return;
+  }
+  empty.style.display='none';
+  if(actions) actions.style.display='flex';
+
+  el.innerHTML='';
+  inspectionEntries.forEach((entry, ei)=>{
+    const card = document.createElement('div');
+    card.style.cssText='border:1px solid #e0e0d8;border-radius:12px;margin-bottom:12px;overflow:hidden';
+
+    // カードヘッダー
+    const head = document.createElement('div');
+    head.style.cssText='background:#f0f4fb;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap';
+    head.innerHTML=`
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600;color:#1a1a1a">${entry.vendor||'（業者名未取得）'}</div>
+        ${entry.orderDate?`<div style="font-size:11px;color:#666;margin-top:2px">発注日：${entry.orderDate}</div>`:''}
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span style="font-size:11px;color:#999">${entry.source||''}</span>
+        <button class="del-btn" onclick="inspectionEntries.splice(${ei},1);renderInspectionList()">削除</button>
+      </div>`;
+    card.appendChild(head);
+
+    // 受領者チェック（全品共通）
+    const rcvRow = document.createElement('div');
+    rcvRow.style.cssText='padding:8px 14px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:8px;flex-wrap:wrap';
+    rcvRow.innerHTML=`<span style="font-size:12px;color:#666;flex-shrink:0">受領者：</span>`;
+    RECEIVERS.forEach(r=>{
+      const sel = entry.items[0] && entry.items[0].receivers.includes(r);
+      const btn = document.createElement('button');
+      btn.className='tbn'+(sel?' ok':'');
+      btn.style.cssText='min-width:52px;padding:7px 12px;font-size:14px';
+      btn.textContent=r;
+      btn.addEventListener('touchstart',()=>{},{ passive:true });
+      btn.onclick=()=>{
+        inspectionEntries[ei].items.forEach(item=>{
+          const idx=item.receivers.indexOf(r);
+          if(idx>=0) item.receivers.splice(idx,1); else item.receivers.push(r);
+        });
+        const nowSel = inspectionEntries[ei].items[0] && inspectionEntries[ei].items[0].receivers.includes(r);
+        btn.className='tbn'+(nowSel?' ok':'');
+        autoSave();
+      };
+      rcvRow.appendChild(btn);
+    });
+    card.appendChild(rcvRow);
+
+    // 品目リスト
+    const itemsWrap = document.createElement('div');
+    itemsWrap.style.cssText='padding:10px 14px';
+
+    entry.items.forEach((item, ii)=>{
+      const itemDiv = document.createElement('div');
+      itemDiv.style.cssText='border:1px solid #eee;border-radius:9px;padding:10px;margin-bottom:8px;background:#fafaf8';
+
+      // 品名行
+      const nameRow = document.createElement('div');
+      nameRow.style.cssText='display:flex;align-items:center;gap:7px;margin-bottom:8px;flex-wrap:wrap';
+      nameRow.innerHTML=`
+        <input class="fi" style="flex:1;min-width:180px;font-size:13px;font-weight:600;padding:7px 10px" placeholder="品目名" value="${item.name}" oninput="inspectionEntries[${ei}].items[${ii}].name=this.value">
+        <input class="fi" type="number" style="width:80px;text-align:center;font-size:14px;padding:7px 6px" placeholder="数量" value="${item.qty}" oninput="inspectionEntries[${ei}].items[${ii}].qty=this.value">
+        <input class="fi" style="width:60px;text-align:center;font-size:14px;padding:7px 6px" placeholder="単位" value="${item.unit}" oninput="inspectionEntries[${ei}].items[${ii}].unit=this.value">
+        <button class="del-btn" onclick="inspectionEntries[${ei}].items.splice(${ii},1);renderInspectionList()">削除</button>`;
+      itemDiv.appendChild(nameRow);
+
+      // 検収入力行1：納品日・時刻・賞味期限・温度
+      const row1 = document.createElement('div');
+      row1.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;margin-bottom:8px';
+      row1.innerHTML=`
+        <div><div style="font-size:10px;color:#666;margin-bottom:3px">納品日</div>
+          <input class="fi" type="date" style="width:100%;font-size:13px;padding:6px 7px" value="${item.deliveryDate}" oninput="inspectionEntries[${ei}].items[${ii}].deliveryDate=this.value"></div>
+        <div><div style="font-size:10px;color:#666;margin-bottom:3px">納品時刻</div>
+          <input class="fi" type="time" style="width:100%;font-size:13px;padding:6px 7px" value="${item.deliveryTime}" oninput="inspectionEntries[${ei}].items[${ii}].deliveryTime=this.value"></div>
+        <div><div style="font-size:10px;color:#666;margin-bottom:3px">賞味期限</div>
+          <input class="fi" type="date" style="width:100%;font-size:13px;padding:6px 7px" value="${item.expiry}" oninput="inspectionEntries[${ei}].items[${ii}].expiry=this.value"></div>
+        <div><div style="font-size:10px;color:#666;margin-bottom:3px">納品温度（℃）</div>
+          <input class="fi" type="number" step="0.5" style="width:100%;font-size:13px;padding:6px 7px;text-align:center" placeholder="--" value="${item.temp}" oninput="inspectionEntries[${ei}].items[${ii}].temp=this.value"></div>`;
+      itemDiv.appendChild(row1);
+
+      // 検収入力行2：保存区分・検収チェック
+      const row2 = document.createElement('div');
+      row2.style.cssText='display:flex;align-items:center;gap:8px;flex-wrap:wrap';
+
+      // 保存区分
+      const storageDiv = document.createElement('div');
+      storageDiv.style.cssText='display:flex;align-items:center;gap:5px';
+      storageDiv.innerHTML=`<span style="font-size:11px;color:#666;flex-shrink:0">保存区分：</span>`;
+      STORAGE_TYPES.forEach(s=>{
+        const btn = document.createElement('button');
+        btn.className='tbn'+(item.storage===s?' ok':'');
+        btn.style.cssText='padding:6px 10px;font-size:12px;min-width:48px';
+        btn.textContent=s;
+        btn.addEventListener('touchstart',()=>{},{ passive:true });
+        btn.onclick=()=>{
+          const newVal = item.storage===s ? '' : s;
+          inspectionEntries[ei].items[ii].storage = newVal;
+          // 同グループのボタンを直接更新
+          storageDiv.querySelectorAll('button').forEach(b=>{
+            b.className='tbn'+(b.textContent===newVal?' ok':'');
+          });
+          autoSave();
+        };
+        storageDiv.appendChild(btn);
+      });
+      row2.appendChild(storageDiv);
+
+      // 検収チェック（梱包・異物・鮮度品質）
+      const checkDiv = document.createElement('div');
+      checkDiv.style.cssText='display:flex;align-items:center;gap:5px;flex-wrap:wrap';
+      CHECK_ITEMS.forEach(c=>{
+        const wrap = document.createElement('div');
+        wrap.style.cssText='display:flex;align-items:center;gap:3px';
+        wrap.innerHTML=`<span style="font-size:11px;color:#666">${c}：</span>`;
+
+        ['○','×'].forEach(sym=>{
+          const btn = document.createElement('button');
+          const isSel = item.checks[c]===sym;
+          btn.className='tbn'+(isSel?(sym==='○'?' ok':' ng'):'');
+          btn.style.cssText='padding:5px 9px;font-size:14px;min-width:38px';
+          btn.textContent=sym;
+          btn.addEventListener('touchstart',()=>{},{ passive:true });
+          btn.onclick=()=>{
+            const cur = inspectionEntries[ei].items[ii].checks[c];
+            const newVal = cur===sym ? '' : sym;
+            inspectionEntries[ei].items[ii].checks[c] = newVal;
+            // 同じ項目の○×ボタンを直接更新
+            wrap.querySelectorAll('button').forEach(b=>{
+              const s2 = b.textContent;
+              b.className='tbn'+(newVal===s2?(s2==='○'?' ok':' ng'):'');
+            });
+            autoSave();
+          };
+          wrap.appendChild(btn);
+        });
+        checkDiv.appendChild(wrap);
+      });
+      row2.appendChild(checkDiv);
+      itemDiv.appendChild(row2);
+
+      itemsWrap.appendChild(itemDiv);
+    });
+
+    // 品目追加ボタン
+    const addBtn = document.createElement('button');
+    addBtn.className='add-row-btn';
+    addBtn.textContent='＋ 品目を追加';
+    addBtn.onclick=()=>{
+      inspectionEntries[ei].items.push({ name:'', qty:'', unit:'kg', storage:'', expiry:'', temp:'', checks:{梱包:'',異物:'','鮮度・品質':''}, receivers:[], deliveryDate:'', deliveryTime:'' });
+      renderInspectionList();
+    };
+    itemsWrap.appendChild(addBtn);
+
+    // 備考
+    const noteDiv = document.createElement('div');
+    noteDiv.style.cssText='margin-top:8px';
+    noteDiv.innerHTML=`<div style="font-size:11px;color:#666;margin-bottom:3px">備考・返品メモ</div>
+      <textarea class="fi" style="width:100%;min-height:48px;resize:vertical;font-family:inherit;font-size:13px" placeholder="返品・特記事項等" oninput="inspectionEntries[${ei}].note=this.value">${entry.note||''}</textarea>`;
+    itemsWrap.appendChild(noteDiv);
+
+    card.appendChild(itemsWrap);
+    el.appendChild(card);
+  });
+
+  el.appendChild(document.getElementById('inspection-empty'));
+}
+
+function toggleReceiver(ei, name){
+  inspectionEntries[ei].items.forEach(item=>{
+    const idx = item.receivers.indexOf(name);
+    if(idx>=0) item.receivers.splice(idx,1); else item.receivers.push(name);
+  });
+  renderInspectionList();
+}
+
+function saveInspections(){
+  if(!inspectionEntries.length){ alert('保存する検収記録がありません'); return; }
+  const now = new Date();
+  inspectionHistory.push({
+    dateKey: fmtKey(now),
+    date: fmtDate(now),
+    savedAt: now.toLocaleTimeString('ja-JP'),
+    entries: JSON.parse(JSON.stringify(inspectionEntries)),
+  });
+  saveInspectionHistory();
+  inspectionEntries.length=0;
+  renderInspectionList();
+  renderInspectionHistory();
+  alert(`✅ ${fmtDate(now)} の検収記録を保存しました（${inspectionHistory[inspectionHistory.length-1].entries.length}業者分）`);
+}
+
+function renderInspectionHistory(){
+  const el = document.getElementById('inspection-history-list');
+  const em = document.getElementById('inspection-history-empty');
+  el.innerHTML='';
+  if(!inspectionHistory.length){ em.style.display='block'; return; }
+  em.style.display='none';
+  inspectionHistory.slice().reverse().forEach((rec,ri)=>{
+    const row = document.createElement('div');
+    row.className='hist-row';
+    const totalItems = rec.entries.reduce((s,e)=>s+e.items.length,0);
+    row.innerHTML=`<div>
+      <div style="font-size:14px;font-weight:600;color:#1a1a1a">${rec.date}</div>
+      <div style="font-size:12px;color:#666;margin-top:2px">${rec.entries.length}業者　${totalItems}品目　保存:${rec.savedAt}</div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <span class="badge b-ok">保存済み</span>
+      <span style="color:#aaa;font-size:18px">▸</span>
+    </div>`;
+    row.onclick=()=>showInspectionDetail(inspectionHistory.length-1-ri);
+    el.appendChild(row);
+  });
+}
+
+function showInspectionDetail(idx){
+  const rec = inspectionHistory[idx];
+  // 詳細はアラートで概要表示（印刷は既存の印刷ボタンで対応）
+  let msg = `【${rec.date}　検収記録】\n\n`;
+  rec.entries.forEach(e=>{
+    msg += `▶ ${e.vendor}\n`;
+    e.items.forEach(it=>{ msg += `  ・${it.name}　${it.qty}${it.unit}　温度:${it.temp||'未記入'}℃\n`; });
+    msg += '\n';
+  });
+  alert(msg);
+}
+
+function exportInspectionCSV(){
+  if(!inspectionEntries.length){ alert('書き出す検収記録がありません'); return; }
+  const BOM='\uFEFF';
+  let csv=BOM+'業者名,品目名,数量,単位,保存区分,納品日,納品時刻,賞味期限,納品温度(℃),梱包,異物,鮮度・品質,受領者,備考\n';
+  inspectionEntries.forEach(e=>{
+    e.items.forEach(it=>{
+      const expStr = it.expiryYear && it.expiryMonth && it.expiryDay ? `${it.expiryYear}/${it.expiryMonth}/${it.expiryDay}` : (it.expiry||'');
+      csv+=[e.vendor,it.name,it.qty,it.unit,it.storage,it.deliveryDate,it.deliveryTime,expStr,it.temp,it.checks['梱包'],it.checks['異物'],it.checks['鮮度・品質'],it.receivers.join('/'),e.note]
+        .map(x=>`"${String(x||'').replace(/"/g,'""')}"`).join(',')+'\n';
+    });
+  });
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`検収記録_${fmtKey(new Date()).replace(/-/g,'')}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+// ===== 温度・湿度および検食の記録 =====
+const LS_TH = 'khg_th';
+let thAreas = [
+  {name:'和食厨房'},{name:'盛付け'},{name:'洋食厨房2F'},{name:'洋食厨房3F'}
+];
+let curTHArea = 0;
+let thData = {}; // {エリア名: {日: {t09:'',t14:'',h09:'',h14:'',shokuji:'',tanto:'',kakunin:'',note:''}}}
+
+function initTHData(){
+  thAreas.forEach(a=>{
+    if(!thData[a.name]) thData[a.name]={};
+    days.forEach(d=>{ if(!thData[a.name][d]) thData[a.name][d]={t09:'',t14:'',h09:'',h14:'',shokuji:'',tanto:'',kakunin:'',note:''}; });
+  });
+}
+
+function renderTHAreaTabs(){
+  const el=document.getElementById('th-area-tabs'); el.innerHTML='';
+  thAreas.forEach((a,i)=>{
+    const t=document.createElement('button'); t.className='wtab'+(i===curTHArea?' active':'');
+    t.textContent=a.name; t.onclick=()=>{curTHArea=i;renderTHAreaTabs();renderTHGrid();};
+    el.appendChild(t);
+  });
+}
+function renderTHGrid(){
+  initTHData();
+  const area=thAreas[curTHArea]; if(!area) return;
+  const el=document.getElementById('th-grid'); el.innerHTML='';
+  // ヘッダー
+  const hdr=document.createElement('div');
+  hdr.style.cssText='display:grid;grid-template-columns:40px 1fr 1fr 1fr 1fr 1fr 1fr;gap:4px;padding:4px 0;font-size:10px;font-weight:600;color:#666;border-bottom:1px solid #eee;margin-bottom:4px';
+  hdr.innerHTML='<div>日</div><div style="text-align:center">温度09:00<br>℃</div><div style="text-align:center">温度14:00<br>℃</div><div style="text-align:center">湿度09:00<br>%</div><div style="text-align:center">湿度14:00<br>%</div><div style="text-align:center">担当者</div><div style="text-align:center">備考</div>';
+  el.appendChild(hdr);
+  days.forEach(d=>{
+    const r=thData[area.name][d];
+    const row=document.createElement('div');
+    row.style.cssText='display:grid;grid-template-columns:40px 1fr 1fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:3px;align-items:center';
+    const tWarn=(v)=>v&&parseFloat(v)>25?'border-color:#fca5a5;background:#fff5f5':'';
+    const hWarn=(v)=>v&&parseFloat(v)>80?'border-color:#fca5a5;background:#fff5f5':'';
+    row.innerHTML=`<div style="font-size:12px;color:#666;text-align:center">${d}</div>
+      <select class="fi" style="font-size:13px;padding:5px;text-align:center" onchange="thData['${area.name}'][${d}].t09=this.value;updateTHWarn(this,25);autoSave()">${buildTHReel('temp',r.t09)}</select>
+      <select class="fi" style="font-size:13px;padding:5px;text-align:center" onchange="thData['${area.name}'][${d}].t14=this.value;updateTHWarn(this,25);autoSave()">${buildTHReel('temp',r.t14)}</select>
+      <select class="fi" style="font-size:13px;padding:5px;text-align:center" onchange="thData['${area.name}'][${d}].h09=this.value;updateTHWarn(this,80);autoSave()">${buildTHReel('humi',r.h09)}</select>
+      <select class="fi" style="font-size:13px;padding:5px;text-align:center" onchange="thData['${area.name}'][${d}].h14=this.value;updateTHWarn(this,80);autoSave()">${buildTHReel('humi',r.h14)}</select>
+      <input class="fi" style="font-size:13px;padding:5px;text-align:center" placeholder="担当" value="${r.tanto}" oninput="thData['${area.name}'][${d}].tanto=this.value;autoSave()">
+      <input class="fi" style="font-size:13px;padding:5px" placeholder="備考" value="${r.note}" oninput="thData['${area.name}'][${d}].note=this.value;autoSave()">`;
+    el.appendChild(row);
+  });
+}
+function updateTHWarn(el,limit){
+  const v=parseFloat(el.value);
+  if(!el.value){el.style.borderColor='';el.style.background='';return;}
+  el.style.borderColor=v>limit?'#fca5a5':''; el.style.background=v>limit?'#fff5f5':'';
+}
+let tmpTHAreas=[];
+function openTempHumidAreaModal(){tmpTHAreas=thAreas.map(a=>({...a}));renderTHAreaModalList();document.getElementById('th-area-modal').classList.add('open');}
+function renderTHAreaModalList(){
+  const el=document.getElementById('th-area-modal-list');el.innerHTML='';
+  tmpTHAreas.forEach((a,i)=>{
+    const row=document.createElement('div');row.className='modal-item';
+    row.innerHTML=`<input class="fi" style="flex:1" value="${a.name}" oninput="tmpTHAreas[${i}].name=this.value" placeholder="エリア名">
+      <button class="del-btn" onclick="tmpTHAreas.splice(${i},1);renderTHAreaModalList()">削除</button>`;
+    el.appendChild(row);
+  });
+}
+function addTHArea(){tmpTHAreas.push({name:''});renderTHAreaModalList();}
+function saveTHAreas(){thAreas=tmpTHAreas.filter(a=>a.name.trim());initTHData();curTHArea=0;renderTHAreaTabs();renderTHGrid();saveSettings();closeModal('th-area-modal');}
+
+// ===== 調理器具の管理票 =====
+const LS_KNIFE = 'khg_knife';
+let knifeTypes=[{label:'肉用（赤）',color:'#dc2626'},{label:'魚 下処理用（白）',color:'#666'},{label:'魚 刺身用（青）',color:'#185FA5'},{label:'調理済み用（黄）',color:'#d97706'},{label:'野菜用（緑）',color:'#15803d'}];
+const KNIFE_TYPES_COLORS=['#dc2626','#666','#185FA5','#d97706','#15803d','#7c3aed','#0891b2','#be185d'];
+let knifeAreas=[
+  {name:'洋食厨房2F', tools:[{label:'肉用包丁（赤）',color:'#dc2626',count:0},{label:'魚 下処理用（白）',color:'#666',count:0},{label:'魚 刺身用（青）',color:'#185FA5',count:1},{label:'調理済み用（黄）',color:'#d97706',count:3},{label:'野菜用（緑）',color:'#15803d',count:8}]},
+  {name:'洋食厨房3F', tools:[{label:'肉用包丁（赤）',color:'#dc2626',count:0},{label:'魚 下処理用（白）',color:'#666',count:0},{label:'魚 刺身用（青）',color:'#185FA5',count:1},{label:'調理済み用（黄）',color:'#d97706',count:3},{label:'野菜用（緑）',color:'#15803d',count:8}]},
+];
+let curKnifeArea=0;
+let knifeData={}; // {エリア: {日: {s:{本数,破損}, e:{本数,破損}} × 器具種別}}
+
+function initKnifeData(){
+  knifeAreas.forEach(a=>{
+    if(!knifeData[a.name])knifeData[a.name]={};
+    days.forEach(d=>{
+      if(!knifeData[a.name][d])knifeData[a.name][d]={};
+      (area.tools||KNIFE_TYPES).forEach((_,ki)=>{
+        if(!knifeData[a.name][d][ki])knifeData[a.name][d][ki]={sc:'',sb:'',ec:'',eb:''};
+      });
+    });
+  });
+}
+function renderKnifeAreaTabs(){
+  const el=document.getElementById('knife-area-tabs');el.innerHTML='';
+  knifeAreas.forEach((a,i)=>{
+    const t=document.createElement('button');t.className='wtab'+(i===curKnifeArea?' active':'');
+    t.textContent=a.name;t.onclick=()=>{curKnifeArea=i;renderKnifeAreaTabs();renderKnifeGrid();};
+    el.appendChild(t);
+  });
+}
+function renderKnifeGrid(){
+  initKnifeData();
+  const area=knifeAreas[curKnifeArea];if(!area)return;
+  const el=document.getElementById('knife-grid');el.innerHTML='';
+  // ヘッダー
+  const hdr=document.createElement('div');
+  const tools=area.tools||KNIFE_TYPES; const cols=`50px repeat(${tools.length*2},1fr)`;
+  hdr.style.cssText=`display:grid;grid-template-columns:${cols};gap:3px;font-size:10px;font-weight:600;color:#666;margin-bottom:4px`;
+  hdr.innerHTML=`<div></div>`+tools.map(t=>`<div style="text-align:center;color:${t.color}">${t.label}<br><small style='font-size:9px'>定数:${t.count}</small><br>本数</div><div style="text-align:center;color:${t.color}">破損</div>`).join('');
+  el.appendChild(hdr);
+  days.forEach(d=>{
+    ['始業','終業'].forEach((timing,ti)=>{
+      const row=document.createElement('div');
+      row.style.cssText=`display:grid;grid-template-columns:${cols};gap:3px;margin-bottom:2px;align-items:center`;
+      const key=ti===0?'sc':'ec'; const bkey=ti===0?'sb':'eb';
+      row.innerHTML=`<div style="font-size:11px;color:#666;text-align:center">${ti===0?d+'日':''}${timing}</div>`+
+        tools.map((_,ki)=>{
+          const r=knifeData[area.name][d][ki];
+          return `<input class="fi" type="number" min="0" style="font-size:12px;padding:4px;text-align:center" placeholder="-" value="${r[key]}" oninput="knifeData['${area.name}'][${d}][${ki}]['${key}']=this.value;autoSave()">
+            <input class="fi" type="number" min="0" style="font-size:12px;padding:4px;text-align:center;${r[bkey]>0?'border-color:#fca5a5;background:#fff5f5':''}" placeholder="0" value="${r[bkey]}" oninput="knifeData['${area.name}'][${d}][${ki}]['${bkey}']=this.value;this.style.borderColor=this.value>0?'#fca5a5':'';this.style.background=this.value>0?'#fff5f5':'';autoSave()">`;
+        }).join('');
+      el.appendChild(row);
+    });
+    const sep=document.createElement('div');sep.style.cssText='border-bottom:0.5px solid #eee;margin:2px 0';
+    el.appendChild(sep);
+  });
+}
+let tmpKnifeAreas=[];
+function openKnifeAreaModal(){tmpKnifeAreas=knifeAreas.map(a=>({...a}));tmpKnifeTypes=[...knifeTypes];renderKnifeAreaModalList();document.getElementById('knife-area-modal').classList.add('open');}
+function renderKnifeAreaModalList(){
+  const el=document.getElementById('knife-area-modal-list');el.innerHTML='';
+  tmpKnifeAreas.forEach((a,i)=>{
+    const tools=a.tools||[];
+    const div=document.createElement('div');
+    div.style.cssText='border:1px solid #eee;border-radius:9px;padding:10px;margin-bottom:10px';
+    div.innerHTML=`<div style="display:flex;gap:6px;margin-bottom:8px">
+        <input class="fi" style="flex:1;font-weight:600" value="${a.name}" oninput="tmpKnifeAreas[${i}].name=this.value" placeholder="エリア名">
+        <button class="del-btn" onclick="tmpKnifeAreas.splice(${i},1);renderKnifeAreaModalList()">削除</button>
+      </div>
+      <div style="font-size:11px;color:#666;margin-bottom:6px">器具（名称・定数）</div>
+      <div id="tools-list-${i}">
+        ${tools.map((t,ti)=>`
+          <div style="display:flex;gap:5px;margin-bottom:5px;align-items:center">
+            <input class="fi" style="flex:1;font-size:13px" value="${t.label}" placeholder="器具名" oninput="tmpKnifeAreas[${i}].tools[${ti}].label=this.value">
+            <input class="fi" type="number" style="width:60px;font-size:13px;text-align:center" value="${t.count}" placeholder="定数" oninput="tmpKnifeAreas[${i}].tools[${ti}].count=parseInt(this.value)||0">
+            <button class="del-btn" onclick="tmpKnifeAreas[${i}].tools.splice(${ti},1);renderKnifeAreaModalList()">削除</button>
+          </div>`).join('')}
+      </div>
+      <button class="add-row-btn" style="font-size:12px;padding:5px 10px" onclick="tmpKnifeAreas[${i}].tools.push({label:'',color:'#666',count:0});renderKnifeAreaModalList()">＋ 器具を追加</button>`;
+    el.appendChild(div);
+  });
+}
+function addKnifeArea(){tmpKnifeAreas.push({name:'',tools:[{label:'包丁',color:'#666',count:0}]});renderKnifeAreaModalList();}
+function saveKnifeAreas(){
+  knifeAreas=tmpKnifeAreas.filter(a=>a.name.trim()).map(a=>({...a,tools:(a.tools||[]).filter(t=>t.label.trim())}));
+  initKnifeData();curKnifeArea=0;renderKnifeAreaTabs();renderKnifeGrid();saveSettings();closeModal('knife-area-modal');
+}
+
+// ===== ガラス容器の管理票 =====
+let glassAreas=[
+  {name:'洋食厨房2F', items:['スイートチリ','チリソース','黒酢','オレンジマーマレード','柚子胡椒','ポート酒','マデラ酒','ノイリー酒','ブランデー','紹興酒']},
+  {name:'洋食厨房3F', items:['スイートチリ','チリソース','黒酢','オレンジマーマレード','柚子胡椒','ポート酒','マデラ酒','ノイリー酒','ブランデー','紹興酒']},
+];
+let curGlassArea=0;
+let glassData={}; // {エリア: {日: {始業:{品目:''}, 終業:{品目:''}}}}
+
+function initGlassData(){
+  glassAreas.forEach(a=>{
+    if(!glassData[a.name])glassData[a.name]={};
+    days.forEach(d=>{
+      if(!glassData[a.name][d])glassData[a.name][d]={s:{},e:{}};
+      a.items.forEach(it=>{
+        if(!glassData[a.name][d].s[it])glassData[a.name][d].s[it]='';
+        if(!glassData[a.name][d].e[it])glassData[a.name][d].e[it]='';
+      });
+    });
+  });
+}
+function renderGlassAreaTabs(){
+  const el=document.getElementById('glass-area-tabs');el.innerHTML='';
+  glassAreas.forEach((a,i)=>{
+    const t=document.createElement('button');t.className='wtab'+(i===curGlassArea?' active':'');
+    t.textContent=a.name;t.onclick=()=>{curGlassArea=i;renderGlassAreaTabs();renderGlassGrid();};
+    el.appendChild(t);
+  });
+}
+function renderGlassGrid(){
+  initGlassData();
+  const area=glassAreas[curGlassArea];if(!area)return;
+  const el=document.getElementById('glass-grid');el.innerHTML='';
+  const itemCount=area.items.length;
+  const cols=`50px 40px repeat(${itemCount},1fr)`;
+  const hdr=document.createElement('div');
+  hdr.style.cssText=`display:grid;grid-template-columns:${cols};gap:3px;font-size:10px;font-weight:600;color:#666;margin-bottom:4px`;
+  hdr.innerHTML=`<div>日</div><div></div>`+area.items.map(it=>`<div style="text-align:center;writing-mode:vertical-rl;height:60px;font-size:10px">${it}</div>`).join('');
+  el.appendChild(hdr);
+  days.forEach(d=>{
+    ['始業','終業'].forEach((timing,ti)=>{
+      const skey=ti===0?'s':'e';
+      const row=document.createElement('div');
+      row.style.cssText=`display:grid;grid-template-columns:${cols};gap:3px;margin-bottom:2px;align-items:center`;
+      row.innerHTML=`<div style="font-size:11px;color:#666;text-align:center">${ti===0?d+'日':''}</div>
+        <div style="font-size:11px;color:#666;text-align:center">${timing}</div>`+
+        area.items.map(it=>{
+          const v=glassData[area.name][d][skey][it]||'';
+          const isNG=v==='×';
+          return `<button class="tbn ${isNG?'ng':v==='○'?'ok':''}" style="padding:4px;font-size:13px;min-width:0;width:100%"
+            onclick="toggleGlass('${area.name}',${d},'${skey}','${it}',this)">${v||'○'}</button>`;
+        }).join('');
+      el.appendChild(row);
+    });
+    const sep=document.createElement('div');sep.style.cssText='border-bottom:0.5px solid #eee;margin:2px 0';
+    el.appendChild(sep);
+  });
+}
+function toggleGlass(aname,d,skey,item,btn){
+  const cur=glassData[aname][d][skey][item];
+  const next=cur===''||cur==='○'?'×':'○';
+  glassData[aname][d][skey][item]=next;
+  btn.textContent=next;
+  btn.className='tbn'+(next==='×'?' ng':' ok');
+  autoSave();
+}
+let tmpGlassAreas=[];
+function openGlassAreaModal(){tmpGlassAreas=glassAreas.map(a=>({name:a.name,itemsStr:a.items.join(',')}));renderGlassAreaModalList();document.getElementById('glass-area-modal').classList.add('open');}
+function renderGlassAreaModalList(){
+  const el=document.getElementById('glass-area-modal-list');el.innerHTML='';
+  tmpGlassAreas.forEach((a,i)=>{
+    const row=document.createElement('div');row.style.cssText='margin-bottom:10px;border:1px solid #eee;border-radius:8px;padding:9px';
+    row.innerHTML=`<div style="display:flex;gap:6px;margin-bottom:6px">
+        <input class="fi" style="flex:1;font-weight:600" value="${a.name}" oninput="tmpGlassAreas[${i}].name=this.value" placeholder="エリア名">
+        <button class="del-btn" onclick="tmpGlassAreas.splice(${i},1);renderGlassAreaModalList()">削除</button>
+      </div>
+      <textarea class="fi" style="width:100%;min-height:56px;resize:vertical;font-size:12px" placeholder="品目（カンマ区切り）" oninput="tmpGlassAreas[${i}].itemsStr=this.value">${a.itemsStr}</textarea>`;
+    el.appendChild(row);
+  });
+}
+function addGlassArea(){tmpGlassAreas.push({name:'',itemsStr:''});renderGlassAreaModalList();}
+function saveGlassAreas(){
+  glassAreas=tmpGlassAreas.filter(a=>a.name.trim()).map(a=>({name:a.name,items:a.itemsStr.split(',').map(s=>s.trim()).filter(s=>s)}));
+  initGlassData();curGlassArea=0;renderGlassAreaTabs();renderGlassGrid();saveSettings();closeModal('glass-area-modal');
+}
+
+// ===== 薬剤在庫管理 =====
+let chemItems=[
+  'ウィルスウォッシュ','オイルバスター','オキシビルファイブ','サニッシュ',
+  'シャキシャキS','スチームオーブンクリーナー','ティポールブルーナチュラル',
+  'ハンドソーププラスＦ','プロセントブリーチプラス','除菌漂白剤','中性除菌洗剤ＮＤ'
+];
+let chemData={}; // {日: {品目: {in:'',out:'',ledger:'',actual:'',note:''}}}
+
+function initChemData(){
+  days.forEach(d=>{
+    if(!chemData[d])chemData[d]={};
+    chemItems.forEach(item=>{
+      if(!chemData[d][item])chemData[d][item]={carry:'',in:'',out:'',actual:'',note:''};
+    });
+  });
+}
+function calcChemActual(d, item){
+  // 実在庫 = 繰越在庫 + 入荷 - 出庫
+  const c=parseFloat(chemData[d][item].carry)||0;
+  const i=parseFloat(chemData[d][item].in)||0;
+  const o=parseFloat(chemData[d][item].out)||0;
+  return c+i-o;
+}
+function autoFillChem(d, item){
+  const actual = calcChemActual(d, item);
+  chemData[d][item].actual = String(actual);
+  const nextD = d+1;
+  if(nextD<=31){
+    if(!chemData[nextD])chemData[nextD]={};
+    if(!chemData[nextD][item])chemData[nextD][item]={carry:'',in:'',out:'',actual:'',note:''};
+    chemData[nextD][item].carry = String(actual);
+  }
+  renderChemGrid();
+  autoSave();
+}
+
+// 前月31日の実在庫を今月1日の繰越に自動コピー
+function applyPrevMonthCarry(){
+  const now = new Date();
+  const prevYear = now.getMonth()===0 ? now.getFullYear()-1 : now.getFullYear();
+  const prevMonth = now.getMonth()===0 ? 12 : now.getMonth(); // 1-indexed
+  const prevKey = `khg_chem_${prevYear}_${String(prevMonth).padStart(2,'0')}`;
+  const prevData = lsGet(prevKey);
+  if(!prevData) return false;
+  // 前月の最終日（28〜31日）を探して実在庫を取得
+  let found = false;
+  for(let d=31; d>=28; d--){
+    if(prevData[d]){
+      chemItems.forEach(item=>{
+        const act = prevData[d][item]&&prevData[d][item].actual;
+        if(act){
+          if(!chemData[1])chemData[1]={};
+          if(!chemData[1][item])chemData[1][item]={carry:'',in:'',out:'',actual:'',note:''};
+          if(!chemData[1][item].carry) chemData[1][item].carry = act;
+          autoFillChem(1, item);
+          found = true;
+        }
+      });
+      break;
+    }
+  }
+  return found;
+}
+
+// 薬剤データを月ごとのキーで保存
+function saveChemDataMonthly(){
+  const now = new Date();
+  const key = `khg_chem_${now.getFullYear()}_${String(now.getMonth()+1).padStart(2,'0')}`;
+  lsSet(key, chemData);
+  saveChemDataMonthly(); // 後方互換
+}
+function loadChemDataMonthly(){
+  const now = new Date();
+  const key = `khg_chem_${now.getFullYear()}_${String(now.getMonth()+1).padStart(2,'0')}`;
+  return lsGet(key) || lsGet('khg_chem_data');
+}
+function renderChemGrid(){
+  initChemData();
+  const el=document.getElementById('chem-grid');el.innerHTML='';
+  const cols=`40px 60px repeat(${chemItems.length},1fr)`;
+  // ヘッダー
+  const hdr=document.createElement('div');
+  hdr.style.cssText=`display:grid;grid-template-columns:${cols};gap:3px;font-size:10px;font-weight:600;color:#666;margin-bottom:4px`;
+  hdr.innerHTML=`<div>日</div><div>項目</div>`+chemItems.map(it=>`<div style="text-align:center;writing-mode:vertical-rl;height:70px;font-size:10px">${it}</div>`).join('');
+  el.appendChild(hdr);
+  const ROW_DEFS=[
+    {label:'繰越在庫',key:'carry',bg:'#f0f4fb',readonly:true},
+    {label:'入荷',key:'in',bg:''},
+    {label:'出庫',key:'out',bg:''},
+    {label:'実在庫',key:'actual',bg:'#f0fdf4',readonly:true},
+    {label:'逸脱時対応',key:'note',bg:''},
+  ];
+  days.forEach(d=>{
+    ROW_DEFS.forEach((def,ri)=>{
+      const row=document.createElement('div');
+      row.style.cssText=`display:grid;grid-template-columns:${cols};gap:3px;margin-bottom:2px;align-items:center`;
+      row.innerHTML=`<div style="font-size:11px;color:#666;text-align:center">${ri===0?d+'日':''}</div>
+        <div style="font-size:11px;color:#555;background:${def.bg||'transparent'};padding:2px 4px;border-radius:4px">${def.label}</div>`+
+        chemItems.map(item=>{
+          const v=chemData[d][item][def.key]||'';
+          const isReadonly=def.readonly;
+          const style=`font-size:12px;padding:4px;text-align:center;background:${def.bg||''};${isReadonly?'color:#555;':''}`;
+          if(isReadonly){
+            // 1日目の繰越だけ手入力可能
+            if(def.key==='carry' && d===1){
+              return `<input class="fi" style="${style}" placeholder="前月末" value="${v}" oninput="chemData[1]['${item}'].carry=this.value;autoFillChem(1,'${item}');">`;
+            }
+            return `<div class="fi" style="${style}min-height:28px;display:flex;align-items:center;justify-content:center">${v||'-'}</div>`;
+          }
+          const onInput = (def.key==='in'||def.key==='out')
+            ? `chemData[${d}]['${item}']['${def.key}']=this.value;autoFillChem(${d},'${item}');`
+            : `chemData[${d}]['${item}']['${def.key}']=this.value;autoSave();`;
+          return `<input class="fi" style="${style}" placeholder="-" value="${v}" oninput="${onInput}">`;
+        }).join('');
+      el.appendChild(row);
+    });
+    const sep=document.createElement('div');sep.style.cssText='border-bottom:2px solid #eee;margin:4px 0';
+    el.appendChild(sep);
+  });
+}
+let tmpChemItems=[];
+function openChemEditModal(){tmpChemItems=[...chemItems];renderChemEditList();document.getElementById('chem-edit-modal').classList.add('open');}
+function renderChemEditList(){
+  const el=document.getElementById('chem-edit-list');el.innerHTML='';
+  tmpChemItems.forEach((item,i)=>{
+    const row=document.createElement('div');row.className='modal-item';
+    row.innerHTML=`<input class="fi" style="flex:1" value="${item}" oninput="tmpChemItems[${i}]=this.value" placeholder="薬剤名">
+      <button class="del-btn" onclick="tmpChemItems.splice(${i},1);renderChemEditList()">削除</button>`;
+    el.appendChild(row);
+  });
+}
+function addChemItem(){tmpChemItems.push('');renderChemEditList();}
+function saveChemItems(){chemItems=tmpChemItems.filter(s=>s.trim());initChemData();renderChemGrid();saveSettings();closeModal('chem-edit-modal');}
+
+// データ保存・ロード・描画は各関数に直接統合済み
+
+init();
+
+// PWA Service Worker登録
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
+
+// iOS PWA キーボード対策
+// タップしたinput/textarea/selectに強制フォーカスを当てる
+document.addEventListener('touchend', function(e){
+  const el = e.target;
+  if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT'){
+    e.preventDefault();
+    setTimeout(()=>{
+      el.focus();
+      if(el.setSelectionRange && el.type !== 'date' && el.type !== 'time' && el.type !== 'number'){
+        const len = el.value.length;
+        el.setSelectionRange(len, len);
+      }
+    }, 50);
+  }
+}, { passive: false });
+</script>
+</body>
+</html>
