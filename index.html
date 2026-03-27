@@ -27,7 +27,7 @@ body{font-family:'Hiragino Kaku Gothic ProN','Hiragino Sans','Meiryo',sans-serif
 .page{display:none}.page.active{display:block}
 .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600}
 .b-ok{background:#dcfce7;color:#15803d}.b-ng{background:#fee2e2;color:#dc2626}.b-pend{background:#fef9c3;color:#854d0e}.b-info{background:#dbeafe;color:#1d4ed8}
-.tbn{padding:10px 16px;border-radius:8px;border:1px solid #d8d8d0;font-size:16px;font-weight:600;cursor:pointer;min-width:52px;text-align:center;background:#f5f5f0;color:#555;-webkit-tap-highlight-color:transparent;transition:all .1s}
+.tbn{padding:12px 18px;border-radius:8px;border:1px solid #d8d8d0;font-size:22px;font-weight:600;cursor:pointer;min-width:60px;text-align:center;background:#f5f5f0;color:#555;-webkit-tap-highlight-color:transparent;transition:all .1s}
 .tbn:active{transform:scale(0.96)}
 .tbn.ok{background:#dcfce7;color:#15803d;border-color:#86efac}
 .tbn.ng{background:#fee2e2;color:#dc2626;border-color:#fca5a5}
@@ -112,6 +112,10 @@ body{font-family:'Hiragino Kaku Gothic ProN','Hiragino Sans','Meiryo',sans-serif
   <div class="tab" onclick="switchTab(4)">油脂AV値</div>
   <div class="tab" onclick="switchTab(5)">履歴</div>
   <div class="tab" onclick="switchTab(6)">検収記録</div>
+  <div class="tab" onclick="switchTab(7)">温度・湿度</div>
+  <div class="tab" onclick="switchTab(8)">調理器具</div>
+  <div class="tab" onclick="switchTab(9)">ガラス容器</div>
+  <div class="tab" onclick="switchTab(10)">薬剤在庫</div>
 </div>
 
 <!-- 健康チェック -->
@@ -158,6 +162,7 @@ body{font-family:'Hiragino Kaku Gothic ProN','Hiragino Sans','Meiryo',sans-serif
 <div id="page2" class="page">
   <div style="display:flex;gap:5px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
     <div class="ward-tabs" id="temp-ward-tabs" style="flex:1;margin-bottom:0"></div>
+    <button class="wtab no-print" onclick="addTempWardQuick()">＋ エリア追加</button>
     <button class="wtab no-print" onclick="openTempEditModal()">機器編集</button>
   </div>
   <div class="section">
@@ -178,21 +183,21 @@ body{font-family:'Hiragino Kaku Gothic ProN','Hiragino Sans','Meiryo',sans-serif
   <div class="section">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
       <div class="sec-title" style="margin-bottom:0;border:none;padding:0">別表8 加熱・冷却記録</div>
-      <button class="wtab no-print" onclick="openWorkerModal()">担当者編集</button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="wtab no-print" onclick="openWorkerModal()">担当者編集</button>
+      </div>
     </div>
     <div class="info-box">加熱基準：芯温85℃以上 1分加熱　冷却基準：60分以内に10℃以下</div>
-    <div style="display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap">
-      <button class="wtab active" onclick="setHType(this,'fry')">揚げ物</button>
-      <button class="wtab" onclick="setHType(this,'steam')">蒸し物</button>
-      <button class="wtab" onclick="setHType(this,'boil')">煮物・炒め物</button>
+    <div style="display:flex;gap:5px;margin-bottom:6px;flex-wrap:wrap;align-items:center">
+      <div id="heat-type-tabs" style="display:flex;gap:5px;flex-wrap:wrap;flex:1"></div>
+      <button class="wtab no-print" onclick="addHeatType()" style="font-size:12px;padding:7px 11px">＋ 種別追加</button>
     </div>
-    <div id="heat-type-lbl" style="font-size:12px;color:#666;margin-bottom:7px">① 揚げ物 加熱・冷却記録</div>
     <div style="overflow-x:auto">
     <table class="heat-table" style="min-width:520px">
       <thead><tr>
-        <th style="width:18%">品名</th><th style="width:12%">油温/庫温℃</th><th style="width:12%">加熱開始</th>
-        <th style="width:12%">芯温℃</th><th style="width:12%">担当者</th><th style="width:10%">冷却開始</th>
-        <th style="width:10%">冷却終了</th><th style="width:10%">冷却後℃</th><th style="width:4%"></th>
+        <th style="width:20%">品名</th><th style="width:13%">油温/庫温℃</th><th style="width:13%">加熱開始</th>
+        <th style="width:13%">芯温℃</th><th style="width:13%">担当者</th><th style="width:12%">冷却開始</th>
+        <th style="width:12%">冷却後℃</th><th style="width:4%"></th>
       </tr></thead>
       <tbody id="heat-body"></tbody>
     </table>
@@ -264,6 +269,102 @@ body{font-family:'Hiragino Kaku Gothic ProN','Hiragino Sans','Meiryo',sans-serif
     <div id="inspection-history-empty" style="font-size:13px;color:#aaa;padding:16px;text-align:center">保存された検収記録はありません</div>
   </div>
 </div>
+
+<!-- 温度・湿度および検食の記録 -->
+<div id="page7" class="page">
+  <div class="section">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <div class="sec-title" style="margin-bottom:0;border:none;padding:0">厨房内温度・湿度および検食の記録</div>
+      <button class="wtab no-print" onclick="openTempHumidAreaModal()">エリア編集</button>
+    </div>
+    <div class="info-box">基準：温度25℃以下　湿度80％以下　超過時は上長へ報告</div>
+    <div class="ward-tabs" id="th-area-tabs"></div>
+    <div id="th-grid"></div>
+  </div>
+</div>
+
+<!-- 調理器具の管理票 -->
+<div id="page8" class="page">
+  <div class="section">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <div class="sec-title" style="margin-bottom:0;border:none;padding:0">別表14 調理器具の管理票</div>
+      <button class="wtab no-print" onclick="openKnifeAreaModal()">エリア編集</button>
+    </div>
+    <div class="info-box">始業・終業時に本数と破損状況を確認。破損があれば即座に上長へ報告。</div>
+    <div class="ward-tabs" id="knife-area-tabs"></div>
+    <div id="knife-grid"></div>
+  </div>
+</div>
+
+<!-- ガラス容器の管理票 -->
+<div id="page9" class="page">
+  <div class="section">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <div class="sec-title" style="margin-bottom:0;border:none;padding:0">別表15 ガラス容器の管理票</div>
+      <button class="wtab no-print" onclick="openGlassAreaModal()">エリア・品目編集</button>
+    </div>
+    <div class="info-box">始業・終業時にガラス容器の破損を確認。破損があれば即座に上長へ報告。</div>
+    <div class="ward-tabs" id="glass-area-tabs"></div>
+    <div id="glass-grid"></div>
+  </div>
+</div>
+
+<!-- 薬剤在庫管理 -->
+<div id="page10" class="page">
+  <div class="section">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <div class="sec-title" style="margin-bottom:0;border:none;padding:0">別表17 薬剤在庫管理</div>
+      <button class="wtab no-print" onclick="openChemEditModal()">薬剤品目編集</button>
+    </div>
+    <div class="info-box">毎日の入荷・出庫・帳簿在庫・実在庫を記録。不一致の場合は逸脱対応欄に記入し上長へ報告。</div>
+    <div id="chem-grid"></div>
+  </div>
+</div>
+
+<!-- モーダル: 温度湿度エリア編集 -->
+<div class="modal-bg" id="th-area-modal"><div class="modal">
+  <div class="modal-title">温度・湿度 エリア管理</div>
+  <div id="th-area-modal-list"></div>
+  <button class="add-row-btn" style="margin-top:8px" onclick="addTHArea()">＋ エリアを追加</button>
+  <div style="display:flex;gap:8px;margin-top:16px">
+    <button class="btn btn-s" onclick="closeModal('th-area-modal')">キャンセル</button>
+    <button class="btn btn-p" onclick="saveTHAreas()">保存</button>
+  </div>
+</div></div>
+
+<!-- モーダル: 調理器具エリア編集 -->
+<div class="modal-bg" id="knife-area-modal"><div class="modal">
+  <div class="modal-title">調理器具 エリア管理</div>
+  <div id="knife-area-modal-list"></div>
+  <button class="add-row-btn" style="margin-top:8px" onclick="addKnifeArea()">＋ エリアを追加</button>
+  <div style="display:flex;gap:8px;margin-top:16px">
+    <button class="btn btn-s" onclick="closeModal('knife-area-modal')">キャンセル</button>
+    <button class="btn btn-p" onclick="saveKnifeAreas()">保存</button>
+  </div>
+</div></div>
+
+<!-- モーダル: ガラス容器エリア・品目編集 -->
+<div class="modal-bg" id="glass-area-modal"><div class="modal">
+  <div class="modal-title">ガラス容器 エリア・品目管理</div>
+  <div style="font-size:12px;color:#666;margin-bottom:10px">エリア名と品目（カンマ区切り）を入力</div>
+  <div id="glass-area-modal-list"></div>
+  <button class="add-row-btn" style="margin-top:8px" onclick="addGlassArea()">＋ エリアを追加</button>
+  <div style="display:flex;gap:8px;margin-top:16px">
+    <button class="btn btn-s" onclick="closeModal('glass-area-modal')">キャンセル</button>
+    <button class="btn btn-p" onclick="saveGlassAreas()">保存</button>
+  </div>
+</div></div>
+
+<!-- モーダル: 薬剤品目編集 -->
+<div class="modal-bg" id="chem-edit-modal"><div class="modal">
+  <div class="modal-title">薬剤品目管理</div>
+  <div id="chem-edit-list"></div>
+  <button class="add-row-btn" style="margin-top:8px" onclick="addChemItem()">＋ 薬剤を追加</button>
+  <div style="display:flex;gap:8px;margin-top:16px">
+    <button class="btn btn-s" onclick="closeModal('chem-edit-modal')">キャンセル</button>
+    <button class="btn btn-p" onclick="saveChemItems()">保存</button>
+  </div>
+</div></div>
 
 <div class="save-bar no-print">
   <button class="btn btn-s" onclick="window.print()">印刷</button>
@@ -402,7 +503,7 @@ let avWard='w';
 const avData={w:{},y:{}};
 const avConfig={w:{fryers:3},y:{fryers:2}};
 const days=Array.from({length:31},(_,i)=>i+1);
-const hTypeLabels={fry:'① 揚げ物',steam:'② 蒸し物',boil:'③ 煮物・炒め物'};
+let hTypeLabels={fry:'揚げ物',steam:'蒸し物',boil:'煮物・炒め物'};
 let hType='fry';
 const hRows={fry:[],steam:[],boil:[]};
 const records=[];
@@ -421,12 +522,16 @@ function resetDailyData(){
 // ===== 設定 読み書き =====
 function loadSettings(){
   const s=lsGet(LS_SETTINGS);if(!s)return;
-  if(s.staffList) staffList=s.staffList;
+  if(s.staffList)  staffList=s.staffList;
   if(s.workerList) workerList=s.workerList;
   if(s.cleanWards) cleanWards=s.cleanWards;
-  if(s.tempWards) tempWards=s.tempWards;
+  if(s.tempWards)  tempWards=s.tempWards;
+  if(s.thAreas)    thAreas=s.thAreas;
+  if(s.knifeAreas) knifeAreas=s.knifeAreas;
+  if(s.glassAreas) glassAreas=s.glassAreas;
+  if(s.chemItems)  chemItems=s.chemItems;
 }
-function saveSettings(){ lsSet(LS_SETTINGS,{staffList,workerList,cleanWards,tempWards}); }
+function saveSettings(){ lsSet(LS_SETTINGS,{staffList,workerList,cleanWards,tempWards,thAreas,knifeAreas,glassAreas,chemItems}); }
 
 // ===== 今日データ 読み書き =====
 function loadTodayData(){
@@ -439,12 +544,23 @@ function loadTodayData(){
   if(d.tempV) tempV=d.tempV;
   if(d.avDataW) Object.assign(avData.w,d.avDataW);
   if(d.avDataY) Object.assign(avData.y,d.avDataY);
-  if(d.hRows) Object.assign(hRows,d.hRows);
+  if(d.hRows){ Object.assign(hRows,d.hRows); }
+  if(d.hTypeLabels){ hTypeLabels=d.hTypeLabels; Object.keys(hTypeLabels).forEach(k=>{ if(!hRows[k])hRows[k]=[]; }); }
   if(d.inspector) document.getElementById('inspector').value=d.inspector;
   if(d.cleanNote) document.getElementById('clean-note').value=d.cleanNote;
+  // 追加データ読み込み
+  const td=lsGet('khg_th_data');    if(td) thData=td;
+  const kd=lsGet('khg_knife_data'); if(kd) knifeData=kd;
+  const gd=lsGet('khg_glass_data'); if(gd) glassData=gd;
+  const cd=loadChemDataMonthly();   if(cd) chemData=cd;
+  if(new Date().getDate()<=3) applyPrevMonthCarry();
 }
 function saveTodayData(){
-  lsSet(LS_TODAY,{dateKey:currentDateKey,hState,hTemps,hDayOff,contacts,cleanState,tempV,avDataW:avData.w,avDataY:avData.y,hRows,inspector:document.getElementById('inspector').value,cleanNote:document.getElementById('clean-note').value});
+  lsSet(LS_TODAY,{dateKey:currentDateKey,hState,hTemps,hDayOff,contacts,cleanState,tempV,avDataW:avData.w,avDataY:avData.y,hRows,hTypeLabels,inspector:document.getElementById('inspector').value,cleanNote:document.getElementById('clean-note').value});
+  lsSet('khg_th_data', thData);
+  lsSet('khg_knife_data', knifeData);
+  lsSet('khg_glass_data', glassData);
+  saveChemDataMonthly();
 }
 function loadRecords(){ const r=lsGet(LS_RECORDS);if(r&&Array.isArray(r)){records.length=0;r.forEach(x=>records.push(x));} }
 function saveRecords(){ lsSet(LS_RECORDS,records); }
@@ -469,8 +585,12 @@ function renderAll(){
   renderCleanWardTabs();renderCleanGrid();
   renderTempWardTabs();renderTempGrid();
   if(!hRows[hType].length)addHRow();else renderHTable();
-  renderHSummary();renderAVRows();renderHist();
+  renderHSummary();renderAVRows();renderHist();renderHeatTypeTabs();
   renderInspectionList();renderInspectionHistory();
+  renderTHAreaTabs();renderTHGrid();
+  renderKnifeAreaTabs();renderKnifeGrid();
+  renderGlassAreaTabs();renderGlassGrid();
+  renderChemGrid();
 }
 
 // ===== 連絡事項 =====
@@ -549,7 +669,7 @@ function renderHealth(){
               </div>
             </div>`;
           }).join('')}
-          ${!isDayOff&&hState[name]['c7']!==null?`<div style="display:flex;align-items:center;gap:10px;margin-top:5px;padding:8px 12px;background:#f0f0ea;border-radius:8px"><span style="font-size:12px;color:#666">体温（℃）</span><input type="number" step="0.1" min="35" max="42" class="fi" style="width:100px;font-size:15px" placeholder="36.5" value="${hTemps[name]||''}" onchange="hTemps['${name}']=this.value;autoSave()"></div>`:''}
+          ${!isDayOff&&hState[name]['c7']!==null?`<div style="display:flex;align-items:center;gap:10px;margin-top:5px;padding:8px 12px;background:#f0f0ea;border-radius:8px"><span style="font-size:12px;color:#666">体温（℃）</span>${(()=>{const vals=[''].concat(makeRange(35.0,37.5,0.1).map(v=>v.toFixed(1)));const cur=hTemps[name]||"";const opts=vals.map(v=>`<option value="${v}" ${cur===v?"selected":""}>${v||"未測定"}</option>`).join("");return `<select class="fi" style="width:130px;font-size:14px;color:${parseFloat(cur)>=37?"#dc2626":"#1a1a1a"}" onchange="hTemps['${name}']=this.value;this.style.color=parseFloat(this.value)>=37?'#dc2626':'#1a1a1a';autoSave()">${opts}</select>`;})()}</div>`:''}
         </div>
       </div>`;
   });
@@ -700,10 +820,10 @@ function renderTempGrid(){
     row.innerHTML=`<div><div style="font-size:13px;font-weight:600;color:#1a1a1a">${f.name}</div>
       <div style="font-size:11px;color:#999;margin-top:2px">設定 ${f.set}　管理 ${f.limit}℃以下　${f.frz?'冷凍':'冷蔵'}</div></div>
       <div><div style="font-size:11px;color:#666;margin-bottom:3px">始業</div>
-        <input class="ti ${cls(sv)}" type="number" step="0.5" placeholder="--" value="${sv}" oninput="saveTmpV(${curTW},${i},'s',this.value,this,${f.limit})">
+        <select class="ti ${cls(sv)}" style="font-size:14px;padding:6px 3px" onchange="saveTmpV(${curTW},${i},'s',this.value,this,${f.limit})">${buildFridgeReel(f.set,sv)}</select>
       </div>
       <div><div style="font-size:11px;color:#666;margin-bottom:3px">終業</div>
-        <input class="ti ${cls(ev)}" type="number" step="0.5" placeholder="--" value="${ev}" oninput="saveTmpV(${curTW},${i},'e',this.value,this,${f.limit})">
+        <select class="ti ${cls(ev)}" style="font-size:14px;padding:6px 3px" onchange="saveTmpV(${curTW},${i},'e',this.value,this,${f.limit})">${buildFridgeReel(f.set,ev)}</select>
       </div>`;
     el.appendChild(row);
   });
@@ -712,6 +832,16 @@ function saveTmpV(wi,i,slot,val,el,limit){
   initTempV();tempV[wi][i][slot]=val;
   if(!val){el.className='ti';autoSave();return;}
   el.className='ti '+(parseFloat(val)<=limit?'tok':'twarn');autoSave();
+}
+function addTempWardQuick(){
+  const name = prompt('新しいエリア名を入力してください');
+  if(!name || !name.trim()) return;
+  tempWards.push({name:name.trim(), fridges:[{name:'冷蔵庫1',set:'5',limit:10,frz:false}]});
+  tempV[tempWards.length-1]={};
+  tempWards[tempWards.length-1].fridges.forEach((_,i)=>tempV[tempWards.length-1][i]={s:'',e:''});
+  saveSettings();
+  renderTempWardTabs();
+  renderTempGrid();
 }
 function markTime(slot){const now=new Date();alert(`${slot==='s'?'始業':'終業'} (${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')})\n各冷蔵庫の温度を入力してください`);}
 
@@ -736,8 +866,31 @@ function addTempItem(){tmpTempItems.push({name:'',set:'5℃',limit:10,frz:false}
 function saveTempItems(){if(!tempWards[curTW])return;tempWards[curTW].fridges=tmpTempItems.filter(f=>f.name.trim());saveSettings();initTempV();renderTempGrid();closeModal('temp-edit-modal');}
 
 // ===== 加熱冷却 =====
-function setHType(btn,t){document.querySelectorAll('#page3 .wtab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');hType=t;document.getElementById('heat-type-lbl').textContent=hTypeLabels[t]+' 加熱・冷却記録';renderHTable();}
-function addHRow(){hRows[hType].push({name:'',temp:'',start:'',core:'',worker:'',cs:'',ce:'',ct:''});renderHTable();}
+function renderHeatTypeTabs(){
+  const el=document.getElementById('heat-type-tabs');
+  if(!el) return;
+  el.innerHTML='';
+  Object.entries(hTypeLabels).forEach(([key,label],idx)=>{
+    const btn=document.createElement('button');
+    btn.className='wtab'+(key===hType?' active':'');
+    btn.textContent=label;
+    btn.onclick=()=>{hType=key;renderHeatTypeTabs();renderHTable();};
+    el.appendChild(btn);
+  });
+}
+function addHeatType(){
+  const name=prompt('新しい種別名を入力してください（例：焼き物）');
+  if(!name||!name.trim())return;
+  const key='custom_'+Date.now();
+  hTypeLabels[key]=name.trim();
+  hRows[key]=[];
+  hType=key;
+  renderHeatTypeTabs();
+  renderHTable();
+  autoSave();
+}
+function setHType(btn,t){hType=t;renderHeatTypeTabs();renderHTable();}
+function addHRow(){hRows[hType].push({name:'',temp:'',start:'',core:'',worker:'',cs:'',ct:''});renderHTable();}
 function renderHTable(){
   const tbody=document.getElementById('heat-body');tbody.innerHTML='';
   if(!hRows[hType].length){addHRow();return;}
@@ -746,17 +899,27 @@ function renderHTable(){
     const cs=r.core?(n>=85?'border-color:#86efac;background:#f0fdf4':'border-color:#fca5a5;background:#fff5f5'):'';
     const wopts=workerList.map(w=>`<option value="${w}" ${r.worker===w?'selected':''}>${w}</option>`).join('');
     const tr=document.createElement('tr');
+    const oilVals=[''].concat(makeRange(50,250,5).map(v=>String(v)));
+    const oilOpts=oilVals.map(v=>`<option value="${v}" ${r.temp===v?'selected':''}>${v||'--'}</option>`).join('');
+    const coreVals=[''].concat(makeRange(60,100,1).map(v=>String(v)));
+    const coreOpts=coreVals.map(v=>`<option value="${v}" ${r.core===v?'selected':''}>${v||(v===''?'--':v)}</option>`).join('');
+    const ctVals=[''].concat(makeRange(0,30,1).map(v=>String(v)));
+    const ctOpts=ctVals.map(v=>`<option value="${v}" ${r.ct===v?'selected':''}>${v||'--'}</option>`).join('');
     tr.innerHTML=`<td><input value="${r.name}" placeholder="品名" oninput="hRows['${hType}'][${i}].name=this.value;autoSave()"></td>
-      <td><input type="number" value="${r.temp}" placeholder="180" oninput="hRows['${hType}'][${i}].temp=this.value;autoSave()"></td>
+      <td><select style="font-size:13px;padding:5px 2px;border:1px solid #d8d8d0;border-radius:7px;background:#fafafa;width:100%" onchange="hRows['${hType}'][${i}].temp=this.value;autoSave()">${oilOpts}</select></td>
       <td><input type="time" value="${r.start}" oninput="hRows['${hType}'][${i}].start=this.value;autoSave()"></td>
-      <td><input type="number" style="${cs}" value="${r.core}" placeholder="85↑" oninput="updHCore(${i},this)"></td>
-      <td><select style="font-size:13px;padding:7px 3px;border:1px solid #d8d8d0;border-radius:7px;background:#fafafa;width:100%;font-family:inherit" onchange="hRows['${hType}'][${i}].worker=this.value;autoSave()"><option value="">担当者</option>${wopts}</select></td>
+      <td><select style="font-size:13px;padding:5px 2px;border:1px solid #d8d8d0;border-radius:7px;background:#fafafa;width:100%;color:${n>=85?'#15803d':n>0?'#dc2626':'#1a1a1a'}" onchange="hRows['${hType}'][${i}].core=this.value;updHCoreSelect(${i},this);autoSave()">${coreOpts}</select></td>
+      <td><select style="font-size:13px;padding:5px 2px;border:1px solid #d8d8d0;border-radius:7px;background:#fafafa;width:100%;font-family:inherit" onchange="hRows['${hType}'][${i}].worker=this.value;autoSave()"><option value="">担当者</option>${wopts}</select></td>
       <td><input type="time" value="${r.cs}" oninput="hRows['${hType}'][${i}].cs=this.value;autoSave()"></td>
-      <td><input type="time" value="${r.ce}" oninput="hRows['${hType}'][${i}].ce=this.value;autoSave()"></td>
-      <td><input type="number" value="${r.ct}" placeholder="10↓" oninput="hRows['${hType}'][${i}].ct=this.value;autoSave()"></td>
+      <td><select style="font-size:13px;padding:5px 2px;border:1px solid #d8d8d0;border-radius:7px;background:#fafafa;width:100%" onchange="hRows['${hType}'][${i}].ct=this.value;autoSave()">${ctOpts}</select></td>
       <td><button class="del-btn" onclick="hRows['${hType}'].splice(${i},1);renderHTable();autoSave()">削除</button></td>`;
     tbody.appendChild(tr);
   });
+  renderHSummary();
+}
+function updHCoreSelect(i,el){
+  const v=el.value; const n=parseFloat(v)||0;
+  el.style.color=n>=85?'#15803d':n>0?'#dc2626':'#1a1a1a';
   renderHSummary();
 }
 function updHCore(i,el){
@@ -772,12 +935,12 @@ function renderHSummary(){
   let html='';
   Object.entries(hRows).forEach(([t,rows])=>{
     const filled=rows.filter(r=>r.name);if(!filled.length)return;
-    html+=`<div style="font-size:12px;color:#666;margin:8px 0 4px;font-weight:600">${hTypeLabels[t]}</div>`;
+    html+=`<div style="font-size:12px;color:#666;margin:8px 0 4px;font-weight:600">${hTypeLabels[t]||t}</div>`;
     filled.forEach(r=>{
       const n=parseFloat(r.core);const ok=n>=85;
       html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #eee;font-size:13px">
         <span>${r.name}${r.worker?' ('+r.worker+')':''}</span>
-        <div style="display:flex;gap:5px">${r.core?`<span class="badge ${ok?'b-ok':'b-ng'}">芯温${r.core}℃</span>`:''}${r.ce?`<span class="badge b-ok">冷却完了</span>`:''}</div>
+        <div style="display:flex;gap:5px">${r.core?`<span class="badge ${ok?'b-ok':'b-ng'}">芯温${r.core}℃</span>`:''}${r.cs?`<span class="badge b-ok">冷却完了</span>`:''}</div>
       </div>`;
     });
   });
@@ -814,7 +977,7 @@ function renderAVRows(){
     const row=document.createElement('div');row.className='av-row';row.style.gridTemplateColumns=cols;
     const inputs=Array.from({length:cfg.fryers},(_,j)=>{
       const v=r.v[j];const vs=v!==null&&v!==''?(parseFloat(v)>2.5?'border-color:#fca5a5;background:#fff5f5':''):'';
-      return `<input class="fi" type="number" step="0.1" min="0" max="5" style="text-align:center;${vs}" placeholder="—" value="${v!==null&&v!==''?v:''}" oninput="updAV(${d},${j},this.value,this)">`;
+      return `<select class="fi" style="font-size:14px;padding:6px 3px;text-align:center" onchange="updAV(${d},${j},this.value,this)">${buildAVReel(v)}</select>`;
     }).join('');
     const xbtns=Array.from({length:cfg.fryers},(_,n)=>`<button class="tbn ${r.xchg.includes(n+1)?'ok':''}" style="min-width:32px;padding:6px 9px;font-size:13px" onclick="toggleXchg(${d},${n+1})">${n+1}</button>`).join('');
     row.innerHTML=`<div style="font-size:13px;color:#666;text-align:center;padding-top:4px">${d}日</div>
@@ -978,6 +1141,44 @@ function clearAllData(){
   records.length=0; resetDailyData(); renderAll();
   closeModal('data-modal');
   alert('✅ 全データを消去しました');
+}
+
+
+// ===== リール選択ヘルパー =====
+function makeReel(values, currentVal, onchangeCode, style=''){
+  const opts = values.map(v=>`<option value="${v}" ${String(currentVal)===String(v)?'selected':''}>${v}</option>`).join('');
+  return `<select class="fi" style="font-size:14px;padding:6px 4px;text-align:center;${style}" onchange="${onchangeCode}">${opts}</select>`;
+}
+function makeRange(min, max, step){
+  const vals=[];
+  for(let v=min; v<=max+0.0001; v=Math.round((v+step)*1000)/1000) vals.push(parseFloat(v.toFixed(2)));
+  return vals;
+}
+function buildAVReel(cur){
+  const vals=[''].concat(makeRange(0,2.5,0.5).map(v=>v.toFixed(1)));
+  return vals.map(v=>`<option value="${v}" ${String(cur)===v?'selected':''}>${v||'--'}</option>`).join('');
+}
+function buildFridgeReel(setTemp, cur){
+  const base=parseFloat(setTemp)||0;
+  const vals=[''].concat(makeRange(base-10,base+10,0.5).map(v=>v.toFixed(1)));
+  return vals.map(v=>`<option value="${v}" ${String(cur)===v?'selected':''}>${v||'--'}</option>`).join('');
+}
+
+
+function buildFridgeReel(setTemp, curVal){
+  const base = parseFloat(setTemp) || 0;
+  const vals = [''].concat(makeRange(base-10, base+10, 0.5).map(v=>v.toFixed(1)));
+  return vals.map(v=>`<option value="${v}" ${String(curVal)===v?'selected':''}>${v||'--'}</option>`).join('');
+}
+function buildAVReel(curVal){
+  const vals = [''].concat(makeRange(0, 2.5, 0.5).map(v=>v.toFixed(1)));
+  return vals.map(v=>`<option value="${v}" ${String(curVal)===String(v)?'selected':''}>${v||'--'}</option>`).join('');
+}
+function buildTHReel(type, curVal){
+  const vals = type==='temp'
+    ? [''].concat(makeRange(10, 40, 1).map(v=>String(v)))
+    : [''].concat(makeRange(0, 100, 10).map(v=>String(v)));
+  return vals.map(v=>`<option value="${v}" ${String(curVal)===String(v)?'selected':''}>${v||'--'}</option>`).join('');
 }
 
 // ===== 検収記録 =====
@@ -1414,6 +1615,382 @@ function exportInspectionCSV(){
   a.href=url; a.download=`検収記録_${fmtKey(new Date()).replace(/-/g,'')}.csv`;
   a.click(); URL.revokeObjectURL(url);
 }
+
+// ===== 温度・湿度および検食の記録 =====
+const LS_TH = 'khg_th';
+let thAreas = [
+  {name:'和食厨房'},{name:'盛付け'},{name:'洋食厨房2F'},{name:'洋食厨房3F'}
+];
+let curTHArea = 0;
+let thData = {}; // {エリア名: {日: {t09:'',t14:'',h09:'',h14:'',shokuji:'',tanto:'',kakunin:'',note:''}}}
+
+function initTHData(){
+  thAreas.forEach(a=>{
+    if(!thData[a.name]) thData[a.name]={};
+    days.forEach(d=>{ if(!thData[a.name][d]) thData[a.name][d]={t09:'',t14:'',h09:'',h14:'',shokuji:'',tanto:'',kakunin:'',note:''}; });
+  });
+}
+
+function renderTHAreaTabs(){
+  const el=document.getElementById('th-area-tabs'); el.innerHTML='';
+  thAreas.forEach((a,i)=>{
+    const t=document.createElement('button'); t.className='wtab'+(i===curTHArea?' active':'');
+    t.textContent=a.name; t.onclick=()=>{curTHArea=i;renderTHAreaTabs();renderTHGrid();};
+    el.appendChild(t);
+  });
+}
+function renderTHGrid(){
+  initTHData();
+  const area=thAreas[curTHArea]; if(!area) return;
+  const el=document.getElementById('th-grid'); el.innerHTML='';
+  // ヘッダー
+  const hdr=document.createElement('div');
+  hdr.style.cssText='display:grid;grid-template-columns:40px 1fr 1fr 1fr 1fr 1fr 1fr;gap:4px;padding:4px 0;font-size:10px;font-weight:600;color:#666;border-bottom:1px solid #eee;margin-bottom:4px';
+  hdr.innerHTML='<div>日</div><div style="text-align:center">温度09:00<br>℃</div><div style="text-align:center">温度14:00<br>℃</div><div style="text-align:center">湿度09:00<br>%</div><div style="text-align:center">湿度14:00<br>%</div><div style="text-align:center">担当者</div><div style="text-align:center">備考</div>';
+  el.appendChild(hdr);
+  days.forEach(d=>{
+    const r=thData[area.name][d];
+    const row=document.createElement('div');
+    row.style.cssText='display:grid;grid-template-columns:40px 1fr 1fr 1fr 1fr 1fr 1fr;gap:4px;margin-bottom:3px;align-items:center';
+    const tWarn=(v)=>v&&parseFloat(v)>25?'border-color:#fca5a5;background:#fff5f5':'';
+    const hWarn=(v)=>v&&parseFloat(v)>80?'border-color:#fca5a5;background:#fff5f5':'';
+    row.innerHTML=`<div style="font-size:12px;color:#666;text-align:center">${d}</div>
+      <select class="fi" style="font-size:13px;padding:5px;text-align:center" onchange="thData['${area.name}'][${d}].t09=this.value;updateTHWarn(this,25);autoSave()">${buildTHReel('temp',r.t09)}</select>
+      <select class="fi" style="font-size:13px;padding:5px;text-align:center" onchange="thData['${area.name}'][${d}].t14=this.value;updateTHWarn(this,25);autoSave()">${buildTHReel('temp',r.t14)}</select>
+      <select class="fi" style="font-size:13px;padding:5px;text-align:center" onchange="thData['${area.name}'][${d}].h09=this.value;updateTHWarn(this,80);autoSave()">${buildTHReel('humi',r.h09)}</select>
+      <select class="fi" style="font-size:13px;padding:5px;text-align:center" onchange="thData['${area.name}'][${d}].h14=this.value;updateTHWarn(this,80);autoSave()">${buildTHReel('humi',r.h14)}</select>
+      <input class="fi" style="font-size:13px;padding:5px;text-align:center" placeholder="担当" value="${r.tanto}" oninput="thData['${area.name}'][${d}].tanto=this.value;autoSave()">
+      <input class="fi" style="font-size:13px;padding:5px" placeholder="備考" value="${r.note}" oninput="thData['${area.name}'][${d}].note=this.value;autoSave()">`;
+    el.appendChild(row);
+  });
+}
+function updateTHWarn(el,limit){
+  const v=parseFloat(el.value);
+  if(!el.value){el.style.borderColor='';el.style.background='';return;}
+  el.style.borderColor=v>limit?'#fca5a5':''; el.style.background=v>limit?'#fff5f5':'';
+}
+let tmpTHAreas=[];
+function openTempHumidAreaModal(){tmpTHAreas=thAreas.map(a=>({...a}));renderTHAreaModalList();document.getElementById('th-area-modal').classList.add('open');}
+function renderTHAreaModalList(){
+  const el=document.getElementById('th-area-modal-list');el.innerHTML='';
+  tmpTHAreas.forEach((a,i)=>{
+    const row=document.createElement('div');row.className='modal-item';
+    row.innerHTML=`<input class="fi" style="flex:1" value="${a.name}" oninput="tmpTHAreas[${i}].name=this.value" placeholder="エリア名">
+      <button class="del-btn" onclick="tmpTHAreas.splice(${i},1);renderTHAreaModalList()">削除</button>`;
+    el.appendChild(row);
+  });
+}
+function addTHArea(){tmpTHAreas.push({name:''});renderTHAreaModalList();}
+function saveTHAreas(){thAreas=tmpTHAreas.filter(a=>a.name.trim());initTHData();curTHArea=0;renderTHAreaTabs();renderTHGrid();saveSettings();closeModal('th-area-modal');}
+
+// ===== 調理器具の管理票 =====
+const LS_KNIFE = 'khg_knife';
+let knifeTypes=[{label:'肉用（赤）',color:'#dc2626'},{label:'魚 下処理用（白）',color:'#666'},{label:'魚 刺身用（青）',color:'#185FA5'},{label:'調理済み用（黄）',color:'#d97706'},{label:'野菜用（緑）',color:'#15803d'}];
+const KNIFE_TYPES_COLORS=['#dc2626','#666','#185FA5','#d97706','#15803d','#7c3aed','#0891b2','#be185d'];
+let knifeAreas=[
+  {name:'洋食厨房2F', tools:[{label:'肉用包丁（赤）',color:'#dc2626',count:0},{label:'魚 下処理用（白）',color:'#666',count:0},{label:'魚 刺身用（青）',color:'#185FA5',count:1},{label:'調理済み用（黄）',color:'#d97706',count:3},{label:'野菜用（緑）',color:'#15803d',count:8}]},
+  {name:'洋食厨房3F', tools:[{label:'肉用包丁（赤）',color:'#dc2626',count:0},{label:'魚 下処理用（白）',color:'#666',count:0},{label:'魚 刺身用（青）',color:'#185FA5',count:1},{label:'調理済み用（黄）',color:'#d97706',count:3},{label:'野菜用（緑）',color:'#15803d',count:8}]},
+];
+let curKnifeArea=0;
+let knifeData={}; // {エリア: {日: {s:{本数,破損}, e:{本数,破損}} × 器具種別}}
+
+function initKnifeData(){
+  knifeAreas.forEach(a=>{
+    if(!knifeData[a.name])knifeData[a.name]={};
+    days.forEach(d=>{
+      if(!knifeData[a.name][d])knifeData[a.name][d]={};
+      (area.tools||KNIFE_TYPES).forEach((_,ki)=>{
+        if(!knifeData[a.name][d][ki])knifeData[a.name][d][ki]={sc:'',sb:'',ec:'',eb:''};
+      });
+    });
+  });
+}
+function renderKnifeAreaTabs(){
+  const el=document.getElementById('knife-area-tabs');el.innerHTML='';
+  knifeAreas.forEach((a,i)=>{
+    const t=document.createElement('button');t.className='wtab'+(i===curKnifeArea?' active':'');
+    t.textContent=a.name;t.onclick=()=>{curKnifeArea=i;renderKnifeAreaTabs();renderKnifeGrid();};
+    el.appendChild(t);
+  });
+}
+function renderKnifeGrid(){
+  initKnifeData();
+  const area=knifeAreas[curKnifeArea];if(!area)return;
+  const el=document.getElementById('knife-grid');el.innerHTML='';
+  // ヘッダー
+  const hdr=document.createElement('div');
+  const tools=area.tools||KNIFE_TYPES; const cols=`50px repeat(${tools.length*2},1fr)`;
+  hdr.style.cssText=`display:grid;grid-template-columns:${cols};gap:3px;font-size:10px;font-weight:600;color:#666;margin-bottom:4px`;
+  hdr.innerHTML=`<div></div>`+tools.map(t=>`<div style="text-align:center;color:${t.color}">${t.label}<br><small style='font-size:9px'>定数:${t.count}</small><br>本数</div><div style="text-align:center;color:${t.color}">破損</div>`).join('');
+  el.appendChild(hdr);
+  days.forEach(d=>{
+    ['始業','終業'].forEach((timing,ti)=>{
+      const row=document.createElement('div');
+      row.style.cssText=`display:grid;grid-template-columns:${cols};gap:3px;margin-bottom:2px;align-items:center`;
+      const key=ti===0?'sc':'ec'; const bkey=ti===0?'sb':'eb';
+      row.innerHTML=`<div style="font-size:11px;color:#666;text-align:center">${ti===0?d+'日':''}${timing}</div>`+
+        tools.map((_,ki)=>{
+          const r=knifeData[area.name][d][ki];
+          return `<input class="fi" type="number" min="0" style="font-size:12px;padding:4px;text-align:center" placeholder="-" value="${r[key]}" oninput="knifeData['${area.name}'][${d}][${ki}]['${key}']=this.value;autoSave()">
+            <input class="fi" type="number" min="0" style="font-size:12px;padding:4px;text-align:center;${r[bkey]>0?'border-color:#fca5a5;background:#fff5f5':''}" placeholder="0" value="${r[bkey]}" oninput="knifeData['${area.name}'][${d}][${ki}]['${bkey}']=this.value;this.style.borderColor=this.value>0?'#fca5a5':'';this.style.background=this.value>0?'#fff5f5':'';autoSave()">`;
+        }).join('');
+      el.appendChild(row);
+    });
+    const sep=document.createElement('div');sep.style.cssText='border-bottom:0.5px solid #eee;margin:2px 0';
+    el.appendChild(sep);
+  });
+}
+let tmpKnifeAreas=[];
+function openKnifeAreaModal(){tmpKnifeAreas=knifeAreas.map(a=>({...a}));tmpKnifeTypes=[...knifeTypes];renderKnifeAreaModalList();document.getElementById('knife-area-modal').classList.add('open');}
+function renderKnifeAreaModalList(){
+  const el=document.getElementById('knife-area-modal-list');el.innerHTML='';
+  tmpKnifeAreas.forEach((a,i)=>{
+    const tools=a.tools||[];
+    const div=document.createElement('div');
+    div.style.cssText='border:1px solid #eee;border-radius:9px;padding:10px;margin-bottom:10px';
+    div.innerHTML=`<div style="display:flex;gap:6px;margin-bottom:8px">
+        <input class="fi" style="flex:1;font-weight:600" value="${a.name}" oninput="tmpKnifeAreas[${i}].name=this.value" placeholder="エリア名">
+        <button class="del-btn" onclick="tmpKnifeAreas.splice(${i},1);renderKnifeAreaModalList()">削除</button>
+      </div>
+      <div style="font-size:11px;color:#666;margin-bottom:6px">器具（名称・定数）</div>
+      <div id="tools-list-${i}">
+        ${tools.map((t,ti)=>`
+          <div style="display:flex;gap:5px;margin-bottom:5px;align-items:center">
+            <input class="fi" style="flex:1;font-size:13px" value="${t.label}" placeholder="器具名" oninput="tmpKnifeAreas[${i}].tools[${ti}].label=this.value">
+            <input class="fi" type="number" style="width:60px;font-size:13px;text-align:center" value="${t.count}" placeholder="定数" oninput="tmpKnifeAreas[${i}].tools[${ti}].count=parseInt(this.value)||0">
+            <button class="del-btn" onclick="tmpKnifeAreas[${i}].tools.splice(${ti},1);renderKnifeAreaModalList()">削除</button>
+          </div>`).join('')}
+      </div>
+      <button class="add-row-btn" style="font-size:12px;padding:5px 10px" onclick="tmpKnifeAreas[${i}].tools.push({label:'',color:'#666',count:0});renderKnifeAreaModalList()">＋ 器具を追加</button>`;
+    el.appendChild(div);
+  });
+}
+function addKnifeArea(){tmpKnifeAreas.push({name:'',tools:[{label:'包丁',color:'#666',count:0}]});renderKnifeAreaModalList();}
+function saveKnifeAreas(){
+  knifeAreas=tmpKnifeAreas.filter(a=>a.name.trim()).map(a=>({...a,tools:(a.tools||[]).filter(t=>t.label.trim())}));
+  initKnifeData();curKnifeArea=0;renderKnifeAreaTabs();renderKnifeGrid();saveSettings();closeModal('knife-area-modal');
+}
+
+// ===== ガラス容器の管理票 =====
+let glassAreas=[
+  {name:'洋食厨房2F', items:['スイートチリ','チリソース','黒酢','オレンジマーマレード','柚子胡椒','ポート酒','マデラ酒','ノイリー酒','ブランデー','紹興酒']},
+  {name:'洋食厨房3F', items:['スイートチリ','チリソース','黒酢','オレンジマーマレード','柚子胡椒','ポート酒','マデラ酒','ノイリー酒','ブランデー','紹興酒']},
+];
+let curGlassArea=0;
+let glassData={}; // {エリア: {日: {始業:{品目:''}, 終業:{品目:''}}}}
+
+function initGlassData(){
+  glassAreas.forEach(a=>{
+    if(!glassData[a.name])glassData[a.name]={};
+    days.forEach(d=>{
+      if(!glassData[a.name][d])glassData[a.name][d]={s:{},e:{}};
+      a.items.forEach(it=>{
+        if(!glassData[a.name][d].s[it])glassData[a.name][d].s[it]='';
+        if(!glassData[a.name][d].e[it])glassData[a.name][d].e[it]='';
+      });
+    });
+  });
+}
+function renderGlassAreaTabs(){
+  const el=document.getElementById('glass-area-tabs');el.innerHTML='';
+  glassAreas.forEach((a,i)=>{
+    const t=document.createElement('button');t.className='wtab'+(i===curGlassArea?' active':'');
+    t.textContent=a.name;t.onclick=()=>{curGlassArea=i;renderGlassAreaTabs();renderGlassGrid();};
+    el.appendChild(t);
+  });
+}
+function renderGlassGrid(){
+  initGlassData();
+  const area=glassAreas[curGlassArea];if(!area)return;
+  const el=document.getElementById('glass-grid');el.innerHTML='';
+  const itemCount=area.items.length;
+  const cols=`50px 40px repeat(${itemCount},1fr)`;
+  const hdr=document.createElement('div');
+  hdr.style.cssText=`display:grid;grid-template-columns:${cols};gap:3px;font-size:10px;font-weight:600;color:#666;margin-bottom:4px`;
+  hdr.innerHTML=`<div>日</div><div></div>`+area.items.map(it=>`<div style="text-align:center;writing-mode:vertical-rl;height:60px;font-size:10px">${it}</div>`).join('');
+  el.appendChild(hdr);
+  days.forEach(d=>{
+    ['始業','終業'].forEach((timing,ti)=>{
+      const skey=ti===0?'s':'e';
+      const row=document.createElement('div');
+      row.style.cssText=`display:grid;grid-template-columns:${cols};gap:3px;margin-bottom:2px;align-items:center`;
+      row.innerHTML=`<div style="font-size:11px;color:#666;text-align:center">${ti===0?d+'日':''}</div>
+        <div style="font-size:11px;color:#666;text-align:center">${timing}</div>`+
+        area.items.map(it=>{
+          const v=glassData[area.name][d][skey][it]||'';
+          const isNG=v==='×';
+          return `<button class="tbn ${isNG?'ng':v==='○'?'ok':''}" style="padding:4px;font-size:13px;min-width:0;width:100%"
+            onclick="toggleGlass('${area.name}',${d},'${skey}','${it}',this)">${v||'○'}</button>`;
+        }).join('');
+      el.appendChild(row);
+    });
+    const sep=document.createElement('div');sep.style.cssText='border-bottom:0.5px solid #eee;margin:2px 0';
+    el.appendChild(sep);
+  });
+}
+function toggleGlass(aname,d,skey,item,btn){
+  const cur=glassData[aname][d][skey][item];
+  const next=cur===''||cur==='○'?'×':'○';
+  glassData[aname][d][skey][item]=next;
+  btn.textContent=next;
+  btn.className='tbn'+(next==='×'?' ng':' ok');
+  autoSave();
+}
+let tmpGlassAreas=[];
+function openGlassAreaModal(){tmpGlassAreas=glassAreas.map(a=>({name:a.name,itemsStr:a.items.join(',')}));renderGlassAreaModalList();document.getElementById('glass-area-modal').classList.add('open');}
+function renderGlassAreaModalList(){
+  const el=document.getElementById('glass-area-modal-list');el.innerHTML='';
+  tmpGlassAreas.forEach((a,i)=>{
+    const row=document.createElement('div');row.style.cssText='margin-bottom:10px;border:1px solid #eee;border-radius:8px;padding:9px';
+    row.innerHTML=`<div style="display:flex;gap:6px;margin-bottom:6px">
+        <input class="fi" style="flex:1;font-weight:600" value="${a.name}" oninput="tmpGlassAreas[${i}].name=this.value" placeholder="エリア名">
+        <button class="del-btn" onclick="tmpGlassAreas.splice(${i},1);renderGlassAreaModalList()">削除</button>
+      </div>
+      <textarea class="fi" style="width:100%;min-height:56px;resize:vertical;font-size:12px" placeholder="品目（カンマ区切り）" oninput="tmpGlassAreas[${i}].itemsStr=this.value">${a.itemsStr}</textarea>`;
+    el.appendChild(row);
+  });
+}
+function addGlassArea(){tmpGlassAreas.push({name:'',itemsStr:''});renderGlassAreaModalList();}
+function saveGlassAreas(){
+  glassAreas=tmpGlassAreas.filter(a=>a.name.trim()).map(a=>({name:a.name,items:a.itemsStr.split(',').map(s=>s.trim()).filter(s=>s)}));
+  initGlassData();curGlassArea=0;renderGlassAreaTabs();renderGlassGrid();saveSettings();closeModal('glass-area-modal');
+}
+
+// ===== 薬剤在庫管理 =====
+let chemItems=[
+  'ウィルスウォッシュ','オイルバスター','オキシビルファイブ','サニッシュ',
+  'シャキシャキS','スチームオーブンクリーナー','ティポールブルーナチュラル',
+  'ハンドソーププラスＦ','プロセントブリーチプラス','除菌漂白剤','中性除菌洗剤ＮＤ'
+];
+let chemData={}; // {日: {品目: {in:'',out:'',ledger:'',actual:'',note:''}}}
+
+function initChemData(){
+  days.forEach(d=>{
+    if(!chemData[d])chemData[d]={};
+    chemItems.forEach(item=>{
+      if(!chemData[d][item])chemData[d][item]={carry:'',in:'',out:'',actual:'',note:''};
+    });
+  });
+}
+function calcChemActual(d, item){
+  // 実在庫 = 繰越在庫 + 入荷 - 出庫
+  const c=parseFloat(chemData[d][item].carry)||0;
+  const i=parseFloat(chemData[d][item].in)||0;
+  const o=parseFloat(chemData[d][item].out)||0;
+  return c+i-o;
+}
+function autoFillChem(d, item){
+  const actual = calcChemActual(d, item);
+  chemData[d][item].actual = String(actual);
+  const nextD = d+1;
+  if(nextD<=31){
+    if(!chemData[nextD])chemData[nextD]={};
+    if(!chemData[nextD][item])chemData[nextD][item]={carry:'',in:'',out:'',actual:'',note:''};
+    chemData[nextD][item].carry = String(actual);
+  }
+  renderChemGrid();
+  autoSave();
+}
+
+// 前月31日の実在庫を今月1日の繰越に自動コピー
+function applyPrevMonthCarry(){
+  const now = new Date();
+  const prevYear = now.getMonth()===0 ? now.getFullYear()-1 : now.getFullYear();
+  const prevMonth = now.getMonth()===0 ? 12 : now.getMonth(); // 1-indexed
+  const prevKey = `khg_chem_${prevYear}_${String(prevMonth).padStart(2,'0')}`;
+  const prevData = lsGet(prevKey);
+  if(!prevData) return false;
+  // 前月の最終日（28〜31日）を探して実在庫を取得
+  let found = false;
+  for(let d=31; d>=28; d--){
+    if(prevData[d]){
+      chemItems.forEach(item=>{
+        const act = prevData[d][item]&&prevData[d][item].actual;
+        if(act){
+          if(!chemData[1])chemData[1]={};
+          if(!chemData[1][item])chemData[1][item]={carry:'',in:'',out:'',actual:'',note:''};
+          if(!chemData[1][item].carry) chemData[1][item].carry = act;
+          autoFillChem(1, item);
+          found = true;
+        }
+      });
+      break;
+    }
+  }
+  return found;
+}
+
+// 薬剤データを月ごとのキーで保存
+function saveChemDataMonthly(){
+  const now = new Date();
+  const key = `khg_chem_${now.getFullYear()}_${String(now.getMonth()+1).padStart(2,'0')}`;
+  lsSet(key, chemData);
+  lsSet('khg_chem_data', chemData); // 後方互換（旧キーにも保存）
+}
+function loadChemDataMonthly(){
+  const now = new Date();
+  const key = `khg_chem_${now.getFullYear()}_${String(now.getMonth()+1).padStart(2,'0')}`;
+  return lsGet(key) || lsGet('khg_chem_data');
+}
+function renderChemGrid(){
+  initChemData();
+  const el=document.getElementById('chem-grid');el.innerHTML='';
+  const cols=`40px 60px repeat(${chemItems.length},1fr)`;
+  // ヘッダー
+  const hdr=document.createElement('div');
+  hdr.style.cssText=`display:grid;grid-template-columns:${cols};gap:3px;font-size:10px;font-weight:600;color:#666;margin-bottom:4px`;
+  hdr.innerHTML=`<div>日</div><div>項目</div>`+chemItems.map(it=>`<div style="text-align:center;writing-mode:vertical-rl;height:70px;font-size:10px">${it}</div>`).join('');
+  el.appendChild(hdr);
+  const ROW_DEFS=[
+    {label:'繰越在庫',key:'carry',bg:'#f0f4fb',readonly:true},
+    {label:'入荷',key:'in',bg:''},
+    {label:'出庫',key:'out',bg:''},
+    {label:'実在庫',key:'actual',bg:'#f0fdf4',readonly:true},
+    {label:'逸脱時対応',key:'note',bg:''},
+  ];
+  days.forEach(d=>{
+    ROW_DEFS.forEach((def,ri)=>{
+      const row=document.createElement('div');
+      row.style.cssText=`display:grid;grid-template-columns:${cols};gap:3px;margin-bottom:2px;align-items:center`;
+      row.innerHTML=`<div style="font-size:11px;color:#666;text-align:center">${ri===0?d+'日':''}</div>
+        <div style="font-size:11px;color:#555;background:${def.bg||'transparent'};padding:2px 4px;border-radius:4px">${def.label}</div>`+
+        chemItems.map(item=>{
+          const v=chemData[d][item][def.key]||'';
+          const isReadonly=def.readonly;
+          const style=`font-size:12px;padding:4px;text-align:center;background:${def.bg||''};${isReadonly?'color:#555;':''}`;
+          if(isReadonly){
+            // 1日目の繰越だけ手入力可能
+            if(def.key==='carry' && d===1){
+              return `<input class="fi" style="${style}" placeholder="前月末" value="${v}" oninput="chemData[1]['${item}'].carry=this.value;autoFillChem(1,'${item}');">`;
+            }
+            return `<div class="fi" style="${style}min-height:28px;display:flex;align-items:center;justify-content:center">${v||'-'}</div>`;
+          }
+          const onInput = (def.key==='in'||def.key==='out')
+            ? `chemData[${d}]['${item}']['${def.key}']=this.value;autoFillChem(${d},'${item}');`
+            : `chemData[${d}]['${item}']['${def.key}']=this.value;autoSave();`;
+          return `<input class="fi" style="${style}" placeholder="-" value="${v}" oninput="${onInput}">`;
+        }).join('');
+      el.appendChild(row);
+    });
+    const sep=document.createElement('div');sep.style.cssText='border-bottom:2px solid #eee;margin:4px 0';
+    el.appendChild(sep);
+  });
+}
+let tmpChemItems=[];
+function openChemEditModal(){tmpChemItems=[...chemItems];renderChemEditList();document.getElementById('chem-edit-modal').classList.add('open');}
+function renderChemEditList(){
+  const el=document.getElementById('chem-edit-list');el.innerHTML='';
+  tmpChemItems.forEach((item,i)=>{
+    const row=document.createElement('div');row.className='modal-item';
+    row.innerHTML=`<input class="fi" style="flex:1" value="${item}" oninput="tmpChemItems[${i}]=this.value" placeholder="薬剤名">
+      <button class="del-btn" onclick="tmpChemItems.splice(${i},1);renderChemEditList()">削除</button>`;
+    el.appendChild(row);
+  });
+}
+function addChemItem(){tmpChemItems.push('');renderChemEditList();}
+function saveChemItems(){chemItems=tmpChemItems.filter(s=>s.trim());initChemData();renderChemGrid();saveSettings();closeModal('chem-edit-modal');}
+
+// データ保存・ロード・描画は各関数に直接統合済み
 
 init();
 
