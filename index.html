@@ -1423,6 +1423,22 @@ if('serviceWorker' in navigator){
     navigator.serviceWorker.register('./sw.js').catch(()=>{});
   });
 }
+
+// iOS PWA キーボード対策
+// タップしたinput/textarea/selectに強制フォーカスを当てる
+document.addEventListener('touchend', function(e){
+  const el = e.target;
+  if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT'){
+    e.preventDefault();
+    setTimeout(()=>{
+      el.focus();
+      if(el.setSelectionRange && el.type !== 'date' && el.type !== 'time' && el.type !== 'number'){
+        const len = el.value.length;
+        el.setSelectionRange(len, len);
+      }
+    }, 50);
+  }
+}, { passive: false });
 </script>
 </body>
 </html>
